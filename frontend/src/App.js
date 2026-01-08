@@ -14,6 +14,7 @@ import UserManagementPage from './pages/UserManagementPage';
 import AuditLogPage from './pages/AuditLogPage';
 import ReportsPage from './pages/ReportsPage';
 import MutationsPage from './pages/MutationsPage';
+import MyProfilePage from './pages/MyProfilePage';
 
 // Components
 import Layout from './components/Layout';
@@ -97,25 +98,10 @@ function AppRoutes() {
       <Route path="/mutations" element={<ProtectedRoute allowedRoles={['admin', 'staff']}><MutationsPage /></ProtectedRoute>} />
       
       {/* Personnel Profile (for personnel role) */}
-      <Route path="/my-profile" element={<ProtectedRoute allowedRoles={['personnel']}><PersonnelDetailPage /></ProtectedRoute>} />
-      
-      {/* Rank History */}
-      <Route path="/rank-history" element={<ProtectedRoute allowedRoles={['admin', 'staff']}><PersonnelListPage /></ProtectedRoute>} />
-      
-      {/* Position History */}
-      <Route path="/position-history" element={<ProtectedRoute allowedRoles={['admin', 'staff']}><PersonnelListPage /></ProtectedRoute>} />
-      
-      {/* Education */}
-      <Route path="/education" element={<ProtectedRoute allowedRoles={['admin', 'staff']}><PersonnelListPage /></ProtectedRoute>} />
-      
-      {/* Family */}
-      <Route path="/family" element={<ProtectedRoute allowedRoles={['admin', 'staff']}><PersonnelListPage /></ProtectedRoute>} />
-      
-      {/* Settings */}
-      <Route path="/settings" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
+      <Route path="/my-profile" element={<ProtectedRoute allowedRoles={['personnel']}><MyProfilePage /></ProtectedRoute>} />
       
       {/* Corrections (for personnel) */}
-      <Route path="/corrections" element={<ProtectedRoute allowedRoles={['personnel']}><DashboardPage /></ProtectedRoute>} />
+      <Route path="/corrections" element={<ProtectedRoute allowedRoles={['personnel']}><MyProfilePage /></ProtectedRoute>} />
       
       {/* Default redirect */}
       <Route path="/" element={<Navigate to="/dashboard" replace />} />
