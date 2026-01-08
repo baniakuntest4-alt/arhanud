@@ -141,7 +141,7 @@ export const DashboardPage = () => {
       <div className="bg-gradient-to-r from-[#4A5D23] to-[#5d7330] rounded-lg p-6 text-white">
         <h1 className="text-2xl font-bold">Selamat Datang, {user?.nama_lengkap}!</h1>
         <p className="text-white/80 mt-1">
-          Anda login sebagai <Badge variant="secondary" className="ml-1 bg-white/20 text-white border-0">{roleLabels[user?.role]}</Badge>
+          Anda login sebagai <span className="ml-1 px-2 py-0.5 rounded-md text-sm bg-white/20 text-white">{roleLabels[user?.role]}</span>
         </p>
       </div>
 
