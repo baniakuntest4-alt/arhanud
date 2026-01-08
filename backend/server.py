@@ -789,20 +789,49 @@ async def import_personnel_excel(file: UploadFile = File(...), user: dict = Depe
         raise HTTPException(status_code=400, detail="File harus berformat Excel (.xlsx atau .xls)")
     
     content = await file.read()
-    df = pd.read_excel(io.BytesIO(content))
     
-    # Map column names
-    column_mapping = {
-        'NAMA': 'nama',
-        'PANGKAT': 'pangkat',
-        'NRP': 'nrp',
-        'JABATAN': 'jabatan',
-        'TMT': 'tmt_jabatan',
-        'TGL LAHIR': 'tanggal_lahir',
-        'PRESTASI': 'prestasi',
-        'DIKBANGUM': 'dikbangum',
-        'DIKBANGSPES': 'dikbangspes'
-    }
+    # Read Excel with no header to handle custom format
+    df_raw = pd.read_excel(io.BytesIO(content), header=None)
+    
+    # Find header row (look for NRP column)
+    header_row = None
+    for i in range(min(10, len(df_raw))):
+        row_values = [str(v).upper() if pd.notna(v) else '' for v in df_raw.iloc[i]]
+        if 'NRP' in row_values or 'NAMA' in row_values:
+            header_row = i
+            break
+    
+    if header_row is not None:
+        # Re-read with correct header
+        df = pd.read_excel(io.BytesIO(content), header=header_row)
+        df.columns = [str(c).strip().upper() for c in df.columns]
+    else:
+        # Try standard reading
+        df = pd.read_excel(io.BytesIO(content))
+        df.columns = [str(c).strip().upper() for c in df.columns]
+    
+    # Map column names (handle variations)
+    column_mapping = {}
+    for col in df.columns:
+        col_clean = col.strip().upper()
+        if 'NAMA' in col_clean:
+            column_mapping[col] = 'nama'
+        elif col_clean == 'PANGKAT':
+            column_mapping[col] = 'pangkat'
+        elif col_clean == 'NRP':
+            column_mapping[col] = 'nrp'
+        elif 'JABATAN' in col_clean:
+            column_mapping[col] = 'jabatan'
+        elif col_clean == 'TMT' or 'TMT' in col_clean:
+            column_mapping[col] = 'tmt_jabatan'
+        elif 'LAHIR' in col_clean:
+            column_mapping[col] = 'tanggal_lahir'
+        elif 'PRESTASI' in col_clean:
+            column_mapping[col] = 'prestasi'
+        elif 'DIKBANGUM' in col_clean:
+            column_mapping[col] = 'dikbangum'
+        elif 'DIKBANGSPES' in col_clean:
+            column_mapping[col] = 'dikbangspes'
     
     df = df.rename(columns=column_mapping)
     
@@ -810,38 +839,70 @@ async def import_personnel_excel(file: UploadFile = File(...), user: dict = Depe
     skipped_count = 0
     errors = []
     
+    # Process rows and combine multi-line entries
+    current_personnel = None
+    
     for idx, row in df.iterrows():
         try:
-            nrp = str(row.get('nrp', '')).strip()
-            if not nrp or nrp == 'nan':
-                skipped_count += 1
+            nrp_val = row.get('nrp', '')
+            nrp = str(nrp_val).strip() if pd.notna(nrp_val) else ''
+            
+            # Skip header-like or empty rows
+            if not nrp or nrp == 'nan' or nrp.upper() == 'NRP' or nrp.isalpha():
+                # Check if this is a continuation row
+                if current_personnel:
+                    # Append additional education/prestasi data
+                    for field in ['dikbangum', 'dikbangspes', 'prestasi']:
+                        val = row.get(field, '')
+                        if pd.notna(val) and str(val).strip() and str(val).strip() != 'nan':
+                            if current_personnel.get(field):
+                                current_personnel[field] += ', ' + str(val).strip()
+                            else:
+                                current_personnel[field] = str(val).strip()
                 continue
             
-            existing = await db.personnel.find_one({"nrp": nrp})
-            if existing:
-                skipped_count += 1
-                continue
+            # Save previous personnel
+            if current_personnel:
+                existing = await db.personnel.find_one({"nrp": current_personnel["nrp"]})
+                if not existing:
+                    await db.personnel.insert_one(current_personnel)
+                    imported_count += 1
+                else:
+                    skipped_count += 1
             
-            personnel = {
+            # Start new personnel record
+            def clean_val(v):
+                if pd.notna(v) and str(v).strip() and str(v).strip().lower() != 'nan':
+                    return str(v).strip()
+                return ''
+            
+            current_personnel = {
                 "id": str(uuid.uuid4()),
                 "nrp": nrp,
-                "nama": str(row.get('nama', '')).strip() if pd.notna(row.get('nama')) else '',
-                "pangkat": str(row.get('pangkat', '')).strip() if pd.notna(row.get('pangkat')) else '',
-                "jabatan": str(row.get('jabatan', '')).strip() if pd.notna(row.get('jabatan')) else '',
+                "nama": clean_val(row.get('nama', '')),
+                "pangkat": clean_val(row.get('pangkat', '')),
+                "jabatan": clean_val(row.get('jabatan', '')),
                 "satuan": "",
-                "tmt_jabatan": str(row.get('tmt_jabatan', '')).strip() if pd.notna(row.get('tmt_jabatan')) else '',
-                "tanggal_lahir": str(row.get('tanggal_lahir', '')).strip() if pd.notna(row.get('tanggal_lahir')) else '',
-                "prestasi": str(row.get('prestasi', '')).strip() if pd.notna(row.get('prestasi')) else '',
-                "dikbangum": str(row.get('dikbangum', '')).strip() if pd.notna(row.get('dikbangum')) else '',
-                "dikbangspes": str(row.get('dikbangspes', '')).strip() if pd.notna(row.get('dikbangspes')) else '',
+                "tmt_jabatan": clean_val(row.get('tmt_jabatan', '')),
+                "tanggal_lahir": clean_val(row.get('tanggal_lahir', '')),
+                "prestasi": clean_val(row.get('prestasi', '')),
+                "dikbangum": clean_val(row.get('dikbangum', '')),
+                "dikbangspes": clean_val(row.get('dikbangspes', '')),
                 "status": "active",
                 "created_at": datetime.now(timezone.utc).isoformat()
             }
             
-            await db.personnel.insert_one(personnel)
-            imported_count += 1
         except Exception as e:
             errors.append(f"Baris {idx + 2}: {str(e)}")
+    
+    # Save last personnel
+    if current_personnel:
+        existing = await db.personnel.find_one({"nrp": current_personnel["nrp"]})
+        if not existing:
+            await db.personnel.insert_one(current_personnel)
+            imported_count += 1
+        else:
+            skipped_count += 1
     
     await create_audit_log(user["id"], user["username"], "IMPORT_PERSONNEL", "personnel", None, None, {"imported": imported_count, "skipped": skipped_count})
     
