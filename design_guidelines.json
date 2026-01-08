@@ -1,0 +1,136 @@
+{
+  "identity": {
+    "name": "SIPERSAD-ARH Design System",
+    "persona": "The Modern Commander",
+    "vibe": "Authoritative, Disciplined, Efficient, Clean",
+    "principles": [
+      "Precision over Decoration: Every pixel must serve a purpose.",
+      "Hierarchy is King: Rank and status must be instantly recognizable.",
+      "Data Density: Admin staff need to see data, not whitespace.",
+      "Official & Trustworthy: It must look like a military system, not a startup."
+    ]
+  },
+  "typography": {
+    "font_family": {
+      "headings": "Chivo, sans-serif",
+      "body": "Inter, sans-serif",
+      "mono": "JetBrains Mono, monospace"
+    },
+    "weights": {
+      "headings": "700",
+      "subheadings": "600",
+      "body": "400",
+      "bold": "600"
+    },
+    "sizes": {
+      "h1": "text-3xl md:text-4xl tracking-tight",
+      "h2": "text-2xl md:text-3xl tracking-tight",
+      "h3": "text-xl font-semibold tracking-tight",
+      "body": "text-sm leading-relaxed",
+      "small": "text-xs text-muted-foreground"
+    },
+    "instructions": "Import 'Chivo' and 'Inter' from Google Fonts in index.css."
+  },
+  "colors": {
+    "palette": {
+      "primary": "#4A5D23",
+      "primary_foreground": "#FFFFFF",
+      "secondary": "#D4AF37",
+      "secondary_foreground": "#1A1A1A",
+      "accent": "#8B0000",
+      "accent_foreground": "#FFFFFF",
+      "background": "#F9FAF9",
+      "foreground": "#1A1C19",
+      "card": "#FFFFFF",
+      "card_foreground": "#1A1C19",
+      "border": "#E2E8E0",
+      "input": "#E2E8E0",
+      "ring": "#4A5D23",
+      "muted": "#F0F2F0",
+      "muted_foreground": "#64748B",
+      "destructive": "#8B0000",
+      "destructive_foreground": "#FFFFFF"
+    },
+    "usage": {
+      "primary": "Main actions, active states, sidebar active items, headers.",
+      "secondary": "Badges, rank icons, high-level highlights, borders for premium items.",
+      "accent": "Critical alerts, 'Delete' actions, rejection status.",
+      "background": "Global page background (Off-white with hint of green).",
+      "card": "Container backgrounds (Pure white)."
+    }
+  },
+  "layout": {
+    "spacing": {
+      "container_padding": "p-6 md:p-8",
+      "section_gap": "gap-6",
+      "component_gap": "gap-4"
+    },
+    "grid": {
+      "dashboard": "grid grid-cols-1 md:grid-cols-12 gap-6",
+      "form": "grid grid-cols-1 md:grid-cols-2 gap-6"
+    },
+    "sidebar": {
+      "width": "w-64",
+      "collapsed_width": "w-16",
+      "style": "bg-white border-r border-border fixed h-full z-30"
+    },
+    "border_radius": {
+      "default": "rounded-md",
+      "card": "rounded-lg",
+      "button": "rounded-md",
+      "input": "rounded-md"
+    }
+  },
+  "components": {
+    "buttons": {
+      "default": "bg-primary text-primary-foreground hover:bg-primary/90 shadow-sm font-medium",
+      "outline": "border-2 border-primary text-primary hover:bg-primary/10 font-medium",
+      "ghost": "hover:bg-muted text-foreground",
+      "destructive": "bg-destructive text-destructive-foreground hover:bg-destructive/90"
+    },
+    "cards": {
+      "style": "bg-card text-card-foreground border border-border shadow-sm hover:shadow-md transition-shadow duration-200",
+      "header": "p-6 pb-3 border-b border-border/50",
+      "content": "p-6 pt-3"
+    },
+    "inputs": {
+      "style": "bg-white border-input focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all duration-200"
+    },
+    "tables": {
+      "style": "w-full caption-bottom text-sm",
+      "header": "border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted",
+      "row": "border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted",
+      "cell": "p-4 align-middle [&:has([role=checkbox])]:pr-0"
+    },
+    "badges": {
+      "rank": "bg-secondary/20 text-secondary-foreground border-secondary/50",
+      "status_active": "bg-green-100 text-green-800 border-green-200",
+      "status_pending": "bg-yellow-100 text-yellow-800 border-yellow-200",
+      "status_rejected": "bg-red-100 text-red-800 border-red-200"
+    }
+  },
+  "assets": {
+    "logo_url": "https://customer-assets.emergentagent.com/job_armypersonnel/artifacts/yzj1ursp_Pussenarhanud.svg.png",
+    "images": {
+      "login_bg": "https://images.pexels.com/photos/6071512/pexels-photo-6071512.jpeg",
+      "placeholder_user": "https://ui.shadcn.com/avatars/01.png"
+    },
+    "icons": "Use 'lucide-react' for all UI icons. Use 'Shield', 'User', 'FileText', 'LogOut', 'Settings', 'Users', 'Award', 'Briefcase' as primary icons."
+  },
+  "visual_enhancers": {
+    "glassmorphism": "backdrop-blur-md bg-white/80 border-b border-white/20 (Use for Topbar only)",
+    "shadows": "shadow-sm for cards, shadow-md for dropdowns/modals",
+    "textures": "Subtle noise texture on Sidebar background (optional) to give tactical feel."
+  },
+  "universal_guidelines": [
+    "DO NOT use gradients for backgrounds. Keep it flat and clean.",
+    "DO NOT use 'Inter' for Headings. Use 'Chivo'.",
+    "Ensure all text has sufficient contrast (APCA/WCAG AA).",
+    "Use 'data-testid' on all interactive elements.",
+    "Forms must be clear: Labels above inputs, clear validation messages.",
+    "Dashboard widgets must be actionable, not just decorative.",
+    "Use the 'Arhanud' logo prominently on the Login page and Topbar.",
+    "Strictly follow the color palette. Do not introduce new colors unless for status (Green/Red/Yellow)."
+  ],
+  "instructions_to_main_agent": "1. Update tailwind.config.js with the colors provided. 2. Update index.css with the font imports and base styles. 3. Create a 'Layout' component that includes the Sidebar and Topbar. 4. Build the Dashboard using the 'Bento' grid system. 5. Use Shadcn components for all interactive elements but style them according to the 'components' section."
+}
