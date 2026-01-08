@@ -1,0 +1,294 @@
+{
+  "timestamp": "2026-01-08T18:09:18.966182",
+  "summary": {
+    "total_tests": 47,
+    "passed": 47,
+    "failed": 0,
+    "success_rate": 100.0
+  },
+  "test_results": [
+    {
+      "test": "System Init",
+      "status": "PASSED",
+      "expected": 200,
+      "actual": 200
+    },
+    {
+      "test": "Login as admin (admin)",
+      "status": "PASSED",
+      "expected": 200,
+      "actual": 200
+    },
+    {
+      "test": "Login as staff (staff1)",
+      "status": "PASSED",
+      "expected": 200,
+      "actual": 200
+    },
+    {
+      "test": "Login as verifier (verifikator1)",
+      "status": "PASSED",
+      "expected": 200,
+      "actual": 200
+    },
+    {
+      "test": "Login as leader (pimpinan)",
+      "status": "PASSED",
+      "expected": 200,
+      "actual": 200
+    },
+    {
+      "test": "Login as personnel (personel1)",
+      "status": "PASSED",
+      "expected": 200,
+      "actual": 200
+    },
+    {
+      "test": "Reference Pangkat List",
+      "status": "PASSED",
+      "expected": 200,
+      "actual": 200
+    },
+    {
+      "test": "Reference Satuan List",
+      "status": "PASSED",
+      "expected": 200,
+      "actual": 200
+    },
+    {
+      "test": "Dashboard Stats (admin)",
+      "status": "PASSED",
+      "expected": 200,
+      "actual": 200
+    },
+    {
+      "test": "Personnel List (admin)",
+      "status": "PASSED",
+      "expected": 200,
+      "actual": 200
+    },
+    {
+      "test": "Personnel Count (admin)",
+      "status": "PASSED",
+      "expected": 200,
+      "actual": 200
+    },
+    {
+      "test": "Get Users List (admin)",
+      "status": "PASSED",
+      "expected": 200,
+      "actual": 200
+    },
+    {
+      "test": "Audit Logs (admin)",
+      "status": "PASSED",
+      "expected": 200,
+      "actual": 200
+    },
+    {
+      "test": "Mutation Requests (admin)",
+      "status": "PASSED",
+      "expected": 200,
+      "actual": 200
+    },
+    {
+      "test": "Correction Requests (admin)",
+      "status": "PASSED",
+      "expected": 200,
+      "actual": 200
+    },
+    {
+      "test": "Personnel Reports (admin)",
+      "status": "PASSED",
+      "expected": 200,
+      "actual": 200
+    },
+    {
+      "test": "Mutations Reports (admin)",
+      "status": "PASSED",
+      "expected": 200,
+      "actual": 200
+    },
+    {
+      "test": "Logout (admin)",
+      "status": "PASSED",
+      "expected": 200,
+      "actual": 200
+    },
+    {
+      "test": "Dashboard Stats (staff)",
+      "status": "PASSED",
+      "expected": 200,
+      "actual": 200
+    },
+    {
+      "test": "Personnel List (staff)",
+      "status": "PASSED",
+      "expected": 200,
+      "actual": 200
+    },
+    {
+      "test": "Personnel Count (staff)",
+      "status": "PASSED",
+      "expected": 200,
+      "actual": 200
+    },
+    {
+      "test": "Mutation Requests (staff)",
+      "status": "PASSED",
+      "expected": 200,
+      "actual": 200
+    },
+    {
+      "test": "Correction Requests (staff)",
+      "status": "PASSED",
+      "expected": 200,
+      "actual": 200
+    },
+    {
+      "test": "Personnel Reports (staff)",
+      "status": "PASSED",
+      "expected": 200,
+      "actual": 200
+    },
+    {
+      "test": "Mutations Reports (staff)",
+      "status": "PASSED",
+      "expected": 200,
+      "actual": 200
+    },
+    {
+      "test": "Logout (staff)",
+      "status": "PASSED",
+      "expected": 200,
+      "actual": 200
+    },
+    {
+      "test": "Dashboard Stats (verifier)",
+      "status": "PASSED",
+      "expected": 200,
+      "actual": 200
+    },
+    {
+      "test": "Personnel List (verifier)",
+      "status": "PASSED",
+      "expected": 200,
+      "actual": 200
+    },
+    {
+      "test": "Personnel Count (verifier)",
+      "status": "PASSED",
+      "expected": 200,
+      "actual": 200
+    },
+    {
+      "test": "Mutation Requests (verifier)",
+      "status": "PASSED",
+      "expected": 200,
+      "actual": 200
+    },
+    {
+      "test": "Correction Requests (verifier)",
+      "status": "PASSED",
+      "expected": 200,
+      "actual": 200
+    },
+    {
+      "test": "Logout (verifier)",
+      "status": "PASSED",
+      "expected": 200,
+      "actual": 200
+    },
+    {
+      "test": "Dashboard Stats (leader)",
+      "status": "PASSED",
+      "expected": 200,
+      "actual": 200
+    },
+    {
+      "test": "Personnel List (leader)",
+      "status": "PASSED",
+      "expected": 200,
+      "actual": 200
+    },
+    {
+      "test": "Personnel Count (leader)",
+      "status": "PASSED",
+      "expected": 200,
+      "actual": 200
+    },
+    {
+      "test": "Audit Logs (leader)",
+      "status": "PASSED",
+      "expected": 200,
+      "actual": 200
+    },
+    {
+      "test": "Mutation Requests (leader)",
+      "status": "PASSED",
+      "expected": 200,
+      "actual": 200
+    },
+    {
+      "test": "Correction Requests (leader)",
+      "status": "PASSED",
+      "expected": 200,
+      "actual": 200
+    },
+    {
+      "test": "Personnel Reports (leader)",
+      "status": "PASSED",
+      "expected": 200,
+      "actual": 200
+    },
+    {
+      "test": "Mutations Reports (leader)",
+      "status": "PASSED",
+      "expected": 200,
+      "actual": 200
+    },
+    {
+      "test": "Logout (leader)",
+      "status": "PASSED",
+      "expected": 200,
+      "actual": 200
+    },
+    {
+      "test": "Dashboard Stats (personnel)",
+      "status": "PASSED",
+      "expected": 200,
+      "actual": 200
+    },
+    {
+      "test": "Personnel List (personnel)",
+      "status": "PASSED",
+      "expected": 200,
+      "actual": 200
+    },
+    {
+      "test": "Personnel Count (personnel)",
+      "status": "PASSED",
+      "expected": 200,
+      "actual": 200
+    },
+    {
+      "test": "Mutation Requests (personnel)",
+      "status": "PASSED",
+      "expected": 200,
+      "actual": 200
+    },
+    {
+      "test": "Correction Requests (personnel)",
+      "status": "PASSED",
+      "expected": 200,
+      "actual": 200
+    },
+    {
+      "test": "Logout (personnel)",
+      "status": "PASSED",
+      "expected": 200,
+      "actual": 200
+    }
+  ],
+  "failed_tests": []
+}
