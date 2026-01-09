@@ -188,16 +188,19 @@ export const PersonelFormPage = () => {
               </div>
               <div className="space-y-2">
                 <Label htmlFor="pangkat">Pangkat *</Label>
-                <Select value={formData.pangkat} onValueChange={(v) => handleChange('pangkat', v)}>
-                  <SelectTrigger data-testid="select-pangkat">
-                    <SelectValue placeholder="Pilih pangkat" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {refPangkat.map((p) => (
-                      <SelectItem key={p.kode} value={p.kode}>{p.kode} - {p.nama}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <Input
+                  id="pangkat"
+                  value={formData.pangkat}
+                  onChange={(e) => handleChange('pangkat', e.target.value)}
+                  placeholder="Contoh: MAYOR ARH, LETKOL ARH"
+                  list="pangkat-list"
+                  data-testid="input-pangkat"
+                />
+                <datalist id="pangkat-list">
+                  {refPangkat.map((p) => (
+                    <option key={p.kode} value={p.kode}>{p.nama}</option>
+                  ))}
+                </datalist>
               </div>
               <div className="space-y-2">
                 <Label htmlFor="korps">Korps</Label>
