@@ -247,185 +247,380 @@ export const PersonelFormPage = () => {
       )}
 
       <form onSubmit={handleSubmit}>
-        <Card>
-          <CardHeader>
-            <CardTitle>Data Dasar</CardTitle>
-            <CardDescription>Informasi identitas personel</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="nrp">NRP *</Label>
-                <Input
-                  id="nrp"
-                  value={formData.nrp}
-                  onChange={(e) => handleChange('nrp', e.target.value)}
-                  placeholder="Nomor Registrasi Pokok"
-                  required
-                  disabled={isEdit}
-                  data-testid="input-nrp"
-                />
-              </div>
-              <div className="space-y-2 md:col-span-2">
-                <Label htmlFor="nama_lengkap">Nama Lengkap *</Label>
-                <Input
-                  id="nama_lengkap"
-                  value={formData.nama_lengkap}
-                  onChange={(e) => handleChange('nama_lengkap', e.target.value)}
-                  placeholder="Nama lengkap dengan gelar"
-                  required
-                  data-testid="input-nama"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="kategori">Kategori *</Label>
-                <Select value={formData.kategori} onValueChange={(v) => handleChange('kategori', v)}>
-                  <SelectTrigger data-testid="select-kategori">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="PERWIRA">Perwira</SelectItem>
-                    <SelectItem value="BINTARA">Bintara</SelectItem>
-                    <SelectItem value="TAMTAMA">Tamtama</SelectItem>
-                    <SelectItem value="PNS">PNS</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="pangkat">Pangkat *</Label>
-                <Input
-                  id="pangkat"
-                  value={formData.pangkat}
-                  onChange={(e) => handleChange('pangkat', e.target.value)}
-                  placeholder="Contoh: MAYOR ARH, LETKOL ARH"
-                  list="pangkat-list"
-                  data-testid="input-pangkat"
-                />
-                <datalist id="pangkat-list">
-                  {refPangkat.map((p) => (
-                    <option key={p.kode} value={p.kode}>{p.nama}</option>
-                  ))}
-                </datalist>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="korps">Korps</Label>
-                <Input
-                  id="korps"
-                  value={formData.korps}
-                  onChange={(e) => handleChange('korps', e.target.value)}
-                  placeholder="ARH"
-                  data-testid="input-korps"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="jenis_kelamin">Jenis Kelamin</Label>
-                <Select value={formData.jenis_kelamin} onValueChange={(v) => handleChange('jenis_kelamin', v)}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="L">Laki-laki</SelectItem>
-                    <SelectItem value="P">Perempuan</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="agama">Agama</Label>
-                <Select value={formData.agama} onValueChange={(v) => handleChange('agama', v)}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {refAgama.map((a) => (
-                      <SelectItem key={a.kode} value={a.kode}>{a.nama}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="tempat_lahir">Tempat Lahir</Label>
-                <Input
-                  id="tempat_lahir"
-                  value={formData.tempat_lahir}
-                  onChange={(e) => handleChange('tempat_lahir', e.target.value)}
-                  placeholder="Kota kelahiran"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="tanggal_lahir">Tanggal Lahir</Label>
-                <Input
-                  id="tanggal_lahir"
-                  value={formData.tanggal_lahir}
-                  onChange={(e) => handleChange('tanggal_lahir', e.target.value)}
-                  placeholder="DD-MM-YYYY"
-                />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <TabsList className="mb-4">
+            <TabsTrigger value="data-dasar">Data Dasar</TabsTrigger>
+            <TabsTrigger value="jabatan">Jabatan & Penugasan</TabsTrigger>
+            <TabsTrigger value="dikbang">
+              <GraduationCap className="w-4 h-4 mr-2" />
+              Pendidikan (DIKBANG)
+            </TabsTrigger>
+          </TabsList>
 
-        <Card className="mt-6">
-          <CardHeader>
-            <CardTitle>Jabatan & Penugasan</CardTitle>
-            <CardDescription>Informasi jabatan dan satuan saat ini</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2 md:col-span-2">
-                <Label htmlFor="jabatan_sekarang">Jabatan Sekarang</Label>
-                <Input
-                  id="jabatan_sekarang"
-                  value={formData.jabatan_sekarang}
-                  onChange={(e) => handleChange('jabatan_sekarang', e.target.value)}
-                  placeholder="Jabatan saat ini"
-                  data-testid="input-jabatan"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="satuan_induk">Satuan Induk</Label>
-                <Input
-                  id="satuan_induk"
-                  value={formData.satuan_induk}
-                  onChange={(e) => handleChange('satuan_induk', e.target.value)}
-                  placeholder="Satuan penugasan"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="tmt_pangkat">TMT Pangkat</Label>
-                <Input
-                  id="tmt_pangkat"
-                  value={formData.tmt_pangkat}
-                  onChange={(e) => handleChange('tmt_pangkat', e.target.value)}
-                  placeholder="DD-MM-YYYY"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="tmt_masuk_dinas">TMT Masuk Dinas</Label>
-                <Input
-                  id="tmt_masuk_dinas"
-                  value={formData.tmt_masuk_dinas}
-                  onChange={(e) => handleChange('tmt_masuk_dinas', e.target.value)}
-                  placeholder="DD-MM-YYYY"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="status_personel">Status</Label>
-                <Select value={formData.status_personel} onValueChange={(v) => handleChange('status_personel', v)}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="AKTIF">Aktif</SelectItem>
-                    <SelectItem value="PENSIUN">Pensiun</SelectItem>
-                    <SelectItem value="MUTASI">Mutasi</SelectItem>
-                    <SelectItem value="MENINGGAL">Meninggal</SelectItem>
-                    <SelectItem value="DIBERHENTIKAN">Diberhentikan</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
+          <TabsContent value="data-dasar">
+            <Card>
+              <CardHeader>
+                <CardTitle>Data Dasar</CardTitle>
+                <CardDescription>Informasi identitas personel</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="nrp">NRP *</Label>
+                    <Input
+                      id="nrp"
+                      value={formData.nrp}
+                      onChange={(e) => handleChange('nrp', e.target.value)}
+                      placeholder="Nomor Registrasi Pokok"
+                      required
+                      disabled={isEdit}
+                      data-testid="input-nrp"
+                    />
+                  </div>
+                  <div className="space-y-2 md:col-span-2">
+                    <Label htmlFor="nama_lengkap">Nama Lengkap *</Label>
+                    <Input
+                      id="nama_lengkap"
+                      value={formData.nama_lengkap}
+                      onChange={(e) => handleChange('nama_lengkap', e.target.value)}
+                      placeholder="Nama lengkap dengan gelar"
+                      required
+                      data-testid="input-nama"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="kategori">Kategori *</Label>
+                    <Select value={formData.kategori} onValueChange={(v) => handleChange('kategori', v)}>
+                      <SelectTrigger data-testid="select-kategori">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="PERWIRA">Perwira</SelectItem>
+                        <SelectItem value="BINTARA">Bintara</SelectItem>
+                        <SelectItem value="TAMTAMA">Tamtama</SelectItem>
+                        <SelectItem value="PNS">PNS</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="pangkat">Pangkat *</Label>
+                    <Input
+                      id="pangkat"
+                      value={formData.pangkat}
+                      onChange={(e) => handleChange('pangkat', e.target.value)}
+                      placeholder="Contoh: MAYOR ARH, LETKOL ARH"
+                      list="pangkat-list"
+                      data-testid="input-pangkat"
+                    />
+                    <datalist id="pangkat-list">
+                      {refPangkat.map((p) => (
+                        <option key={p.kode} value={p.kode}>{p.nama}</option>
+                      ))}
+                    </datalist>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="korps">Korps</Label>
+                    <Input
+                      id="korps"
+                      value={formData.korps}
+                      onChange={(e) => handleChange('korps', e.target.value)}
+                      placeholder="ARH"
+                      data-testid="input-korps"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="jenis_kelamin">Jenis Kelamin</Label>
+                    <Select value={formData.jenis_kelamin} onValueChange={(v) => handleChange('jenis_kelamin', v)}>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="L">Laki-laki</SelectItem>
+                        <SelectItem value="P">Perempuan</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="agama">Agama</Label>
+                    <Select value={formData.agama} onValueChange={(v) => handleChange('agama', v)}>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {refAgama.map((a) => (
+                          <SelectItem key={a.kode} value={a.kode}>{a.nama}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="tempat_lahir">Tempat Lahir</Label>
+                    <Input
+                      id="tempat_lahir"
+                      value={formData.tempat_lahir}
+                      onChange={(e) => handleChange('tempat_lahir', e.target.value)}
+                      placeholder="Kota kelahiran"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="tanggal_lahir">Tanggal Lahir</Label>
+                    <Input
+                      id="tanggal_lahir"
+                      value={formData.tanggal_lahir}
+                      onChange={(e) => handleChange('tanggal_lahir', e.target.value)}
+                      placeholder="DD-MM-YYYY"
+                    />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="jabatan">
+            <Card>
+              <CardHeader>
+                <CardTitle>Jabatan & Penugasan</CardTitle>
+                <CardDescription>Informasi jabatan dan satuan saat ini</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2 md:col-span-2">
+                    <Label htmlFor="jabatan_sekarang">Jabatan Sekarang</Label>
+                    <Input
+                      id="jabatan_sekarang"
+                      value={formData.jabatan_sekarang}
+                      onChange={(e) => handleChange('jabatan_sekarang', e.target.value)}
+                      placeholder="Jabatan saat ini"
+                      data-testid="input-jabatan"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="satuan_induk">Satuan Induk</Label>
+                    <Input
+                      id="satuan_induk"
+                      value={formData.satuan_induk}
+                      onChange={(e) => handleChange('satuan_induk', e.target.value)}
+                      placeholder="Satuan penugasan"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="tmt_pangkat">TMT Pangkat</Label>
+                    <Input
+                      id="tmt_pangkat"
+                      value={formData.tmt_pangkat}
+                      onChange={(e) => handleChange('tmt_pangkat', e.target.value)}
+                      placeholder="DD-MM-YYYY"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="tmt_masuk_dinas">TMT Masuk Dinas</Label>
+                    <Input
+                      id="tmt_masuk_dinas"
+                      value={formData.tmt_masuk_dinas}
+                      onChange={(e) => handleChange('tmt_masuk_dinas', e.target.value)}
+                      placeholder="DD-MM-YYYY"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="status_personel">Status</Label>
+                    <Select value={formData.status_personel} onValueChange={(v) => handleChange('status_personel', v)}>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="AKTIF">Aktif</SelectItem>
+                        <SelectItem value="PENSIUN">Pensiun</SelectItem>
+                        <SelectItem value="MUTASI">Mutasi</SelectItem>
+                        <SelectItem value="MENINGGAL">Meninggal</SelectItem>
+                        <SelectItem value="DIBERHENTIKAN">Diberhentikan</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="dikbang">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* DIKBANGUM */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    <GraduationCap className="w-5 h-5 text-[#4A5D23]" />
+                    DIKBANGUM
+                  </CardTitle>
+                  <CardDescription>Pendidikan Pengembangan Umum</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {/* Add new DIKBANGUM */}
+                  <div className="p-4 border border-dashed border-[#4A5D23]/30 rounded-lg bg-[#4A5D23]/5">
+                    <p className="text-sm font-medium mb-3 text-[#4A5D23]">Tambah DIKBANGUM Baru</p>
+                    <div className="grid grid-cols-1 gap-3">
+                      <Input
+                        placeholder="Nama Pendidikan (contoh: AKMIL, SESKOAD)"
+                        value={newDikbangum.nama_diklat}
+                        onChange={(e) => setNewDikbangum(prev => ({ ...prev, nama_diklat: e.target.value }))}
+                        data-testid="input-dikbangum-nama"
+                      />
+                      <div className="grid grid-cols-2 gap-2">
+                        <Input
+                          placeholder="Tahun Lulus"
+                          value={newDikbangum.tahun}
+                          onChange={(e) => setNewDikbangum(prev => ({ ...prev, tahun: e.target.value }))}
+                          data-testid="input-dikbangum-tahun"
+                        />
+                        <Select 
+                          value={newDikbangum.hasil} 
+                          onValueChange={(v) => setNewDikbangum(prev => ({ ...prev, hasil: v }))}
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="Hasil" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="LULUS">LULUS</SelectItem>
+                            <SelectItem value="TIDAK LULUS">TIDAK LULUS</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <Button 
+                        type="button" 
+                        onClick={handleAddDikbangum}
+                        className="bg-[#4A5D23] hover:bg-[#3d4d1c]"
+                        data-testid="btn-add-dikbangum"
+                      >
+                        <Plus className="w-4 h-4 mr-2" />
+                        Tambah
+                      </Button>
+                    </div>
+                  </div>
+
+                  {/* List DIKBANGUM */}
+                  {dikbangum.length === 0 ? (
+                    <p className="text-sm text-muted-foreground text-center py-4">Belum ada data DIKBANGUM</p>
+                  ) : (
+                    <div className="space-y-2">
+                      {dikbangum.map((d, i) => (
+                        <div key={d.id} className="flex items-center justify-between gap-2 p-3 bg-muted/50 rounded-md">
+                          <div className="flex items-center gap-2 flex-1">
+                            <span className="font-bold text-[#4A5D23] text-sm">{i + 1}.</span>
+                            <span className="font-medium text-sm">{d.nama_diklat}</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Input
+                              className="w-20 h-8 text-center text-sm"
+                              placeholder="Tahun"
+                              value={d.tahun || ''}
+                              onChange={(e) => handleUpdateDikbangTahun(d.id, e.target.value, 'DIKBANGUM')}
+                            />
+                            <Badge variant="outline" className="text-xs">{d.hasil}</Badge>
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8 text-red-500 hover:text-red-700 hover:bg-red-50"
+                              onClick={() => handleDeleteDikbang(d.id, 'DIKBANGUM')}
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </Button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+
+              {/* DIKBANGSPES */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    <GraduationCap className="w-5 h-5 text-[#D4AF37]" />
+                    DIKBANGSPES
+                  </CardTitle>
+                  <CardDescription>Pendidikan Pengembangan Spesialis</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {/* Add new DIKBANGSPES */}
+                  <div className="p-4 border border-dashed border-[#D4AF37]/30 rounded-lg bg-[#D4AF37]/5">
+                    <p className="text-sm font-medium mb-3 text-[#8B7500]">Tambah DIKBANGSPES Baru</p>
+                    <div className="grid grid-cols-1 gap-3">
+                      <Input
+                        placeholder="Nama Pendidikan (contoh: SUSPA TIH, COMBAT INTEL)"
+                        value={newDikbangspes.nama_diklat}
+                        onChange={(e) => setNewDikbangspes(prev => ({ ...prev, nama_diklat: e.target.value }))}
+                        data-testid="input-dikbangspes-nama"
+                      />
+                      <div className="grid grid-cols-2 gap-2">
+                        <Input
+                          placeholder="Tahun Lulus"
+                          value={newDikbangspes.tahun}
+                          onChange={(e) => setNewDikbangspes(prev => ({ ...prev, tahun: e.target.value }))}
+                          data-testid="input-dikbangspes-tahun"
+                        />
+                        <Select 
+                          value={newDikbangspes.hasil} 
+                          onValueChange={(v) => setNewDikbangspes(prev => ({ ...prev, hasil: v }))}
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="Hasil" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="LULUS">LULUS</SelectItem>
+                            <SelectItem value="TIDAK LULUS">TIDAK LULUS</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <Button 
+                        type="button" 
+                        onClick={handleAddDikbangspes}
+                        className="bg-[#D4AF37] hover:bg-[#b8962f] text-white"
+                        data-testid="btn-add-dikbangspes"
+                      >
+                        <Plus className="w-4 h-4 mr-2" />
+                        Tambah
+                      </Button>
+                    </div>
+                  </div>
+
+                  {/* List DIKBANGSPES */}
+                  {dikbangspes.length === 0 ? (
+                    <p className="text-sm text-muted-foreground text-center py-4">Belum ada data DIKBANGSPES</p>
+                  ) : (
+                    <div className="space-y-2">
+                      {dikbangspes.map((d, i) => (
+                        <div key={d.id} className="flex items-center justify-between gap-2 p-3 bg-muted/50 rounded-md">
+                          <div className="flex items-center gap-2 flex-1">
+                            <span className="font-bold text-[#D4AF37] text-sm">{i + 1}.</span>
+                            <span className="font-medium text-sm">{d.nama_diklat}</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Input
+                              className="w-20 h-8 text-center text-sm"
+                              placeholder="Tahun"
+                              value={d.tahun || ''}
+                              onChange={(e) => handleUpdateDikbangTahun(d.id, e.target.value, 'DIKBANGSPES')}
+                            />
+                            <Badge variant="outline" className="text-xs">{d.hasil}</Badge>
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8 text-red-500 hover:text-red-700 hover:bg-red-50"
+                              onClick={() => handleDeleteDikbang(d.id, 'DIKBANGSPES')}
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </Button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
             </div>
-          </CardContent>
-        </Card>
+          </TabsContent>
+        </Tabs>
 
         <div className="flex justify-end gap-3 mt-6">
           <Button type="button" variant="outline" onClick={() => navigate(-1)}>
