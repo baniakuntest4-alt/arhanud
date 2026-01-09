@@ -101,7 +101,7 @@ function AppRoutes() {
       <Route path="/users" element={<ProtectedRoute allowedRoles={['admin']}><UserManagementPage /></ProtectedRoute>} />
       
       {/* Master Data */}
-      <Route path="/master-data" element={<ProtectedRoute allowedRoles={['admin']}><DashboardPage /></ProtectedRoute>} />
+      <Route path="/master-data" element={<ProtectedRoute allowedRoles={['admin']}><MasterDataPage /></ProtectedRoute>} />
       
       {/* Laporan */}
       <Route path="/laporan" element={<ProtectedRoute allowedRoles={['admin', 'staff', 'verifier', 'leader']}><ReportsPage /></ProtectedRoute>} />
