@@ -112,6 +112,12 @@ Membangun aplikasi web internal untuk kepegawaian militer TNI AD (Arhanud) denga
   - User dapat mengedit TAHUN langsung di list yang sudah ada
   - User dapat menghapus data DIKBANG
   - Form terpisah untuk DIKBANGUM (hijau) dan DIKBANGSPES (emas)
+- **Added**: Halaman lengkap untuk Role PERSONEL
+  - Dashboard Personel: Welcome card, stats (status, total pendidikan, pengajuan), ringkasan data, aksi cepat
+  - Profil Saya: View only semua data personel (data dasar, dikbang, riwayat karir, prestasi, keluarga)
+  - Pengajuan Koreksi: Form ajukan koreksi data, riwayat pengajuan, status tracking
+  - Pengaturan: Ganti password
+  - Login redirect berdasarkan role (personnel -> /dashboard-personel)
 
 ## Database Schema (Refactored)
 Aplikasi menggunakan schema multi-koleksi yang ternormalisasi:
