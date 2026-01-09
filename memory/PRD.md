@@ -107,6 +107,11 @@ Membangun aplikasi web internal untuk kepegawaian militer TNI AD (Arhanud) denga
   - Updated 76 records dikbang dengan data tahun
   - Frontend menampilkan tahun dalam badge yang jelas (hijau untuk DIKBANGUM, emas untuk DIKBANGSPES)
   - Format: Nama Diklat - [TAHUN]
+- **Added**: Tab "Pendidikan (DIKBANG)" di form Edit/Tambah Personel
+  - User dapat menambah DIKBANGUM dan DIKBANGSPES baru dengan field: Nama, Tahun, Hasil
+  - User dapat mengedit TAHUN langsung di list yang sudah ada
+  - User dapat menghapus data DIKBANG
+  - Form terpisah untuk DIKBANGUM (hijau) dan DIKBANGSPES (emas)
 
 ## Database Schema (Refactored)
 Aplikasi menggunakan schema multi-koleksi yang ternormalisasi:
