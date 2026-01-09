@@ -224,14 +224,19 @@ export const PersonelDetailPage = () => {
                 ) : (
                   <div className="space-y-3">
                     {dikbangum.map((d, i) => (
-                      <div key={d.id} className="flex items-start gap-3 p-3 bg-muted/50 rounded-md">
-                        <span className="font-bold text-[#4A5D23]">{i + 1}.</span>
-                        <div>
-                          <p className="font-medium">{d.nama_diklat}</p>
-                          <p className="text-xs text-muted-foreground">
-                            {d.tahun && `Tahun: ${d.tahun}`} {d.hasil && `• ${d.hasil}`}
-                          </p>
+                      <div key={d.id} className="flex items-start justify-between gap-3 p-3 bg-muted/50 rounded-md" data-testid={`dikbangum-item-${i}`}>
+                        <div className="flex items-start gap-3">
+                          <span className="font-bold text-[#4A5D23]">{i + 1}.</span>
+                          <div>
+                            <p className="font-medium">{d.nama_diklat}</p>
+                            {d.hasil && <p className="text-xs text-muted-foreground">{d.hasil}</p>}
+                          </div>
                         </div>
+                        {d.tahun && (
+                          <Badge variant="outline" className="bg-[#4A5D23]/10 text-[#4A5D23] border-[#4A5D23]/30 shrink-0">
+                            {d.tahun}
+                          </Badge>
+                        )}
                       </div>
                     ))}
                   </div>
@@ -250,14 +255,19 @@ export const PersonelDetailPage = () => {
                 ) : (
                   <div className="space-y-3">
                     {dikbangspes.map((d, i) => (
-                      <div key={d.id} className="flex items-start gap-3 p-3 bg-muted/50 rounded-md">
-                        <span className="font-bold text-[#4A5D23]">{i + 1}.</span>
-                        <div>
-                          <p className="font-medium">{d.nama_diklat}</p>
-                          <p className="text-xs text-muted-foreground">
-                            {d.tahun && `Tahun: ${d.tahun}`} {d.hasil && `• ${d.hasil}`}
-                          </p>
+                      <div key={d.id} className="flex items-start justify-between gap-3 p-3 bg-muted/50 rounded-md" data-testid={`dikbangspes-item-${i}`}>
+                        <div className="flex items-start gap-3">
+                          <span className="font-bold text-[#4A5D23]">{i + 1}.</span>
+                          <div>
+                            <p className="font-medium">{d.nama_diklat}</p>
+                            {d.hasil && <p className="text-xs text-muted-foreground">{d.hasil}</p>}
+                          </div>
                         </div>
+                        {d.tahun && (
+                          <Badge variant="outline" className="bg-[#D4AF37]/10 text-[#8B7500] border-[#D4AF37]/30 shrink-0">
+                            {d.tahun}
+                          </Badge>
+                        )}
                       </div>
                     ))}
                   </div>
