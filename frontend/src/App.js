@@ -68,21 +68,35 @@ const PublicRoute = ({ children }) => {
 };
 
 function AppRoutes() {
+  const { user } = useAuth();
+  
+  // Determine home route based on role
+  const getHomeRoute = () => {
+    if (user?.role === 'personnel') return '/dashboard-personel';
+    return '/dashboard';
+  };
+
   return (
     <Routes>
       {/* Public */}
       <Route path="/login" element={<PublicRoute><LoginPage /></PublicRoute>} />
       
-      {/* Dashboard */}
-      <Route path="/dashboard" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
+      {/* Dashboard - role based */}
+      <Route path="/dashboard" element={<ProtectedRoute allowedRoles={['admin', 'staff', 'verifier', 'leader']}><DashboardPage /></ProtectedRoute>} />
+      <Route path="/dashboard-personel" element={<ProtectedRoute allowedRoles={['personnel']}><DashboardPersonelPage /></ProtectedRoute>} />
       
-      {/* Personel */}
-      <Route path="/personel" element={<ProtectedRoute><PersonelListPage /></ProtectedRoute>} />
+      {/* Personel Data - Admin/Staff/Verifier/Leader */}
+      <Route path="/personel" element={<ProtectedRoute allowedRoles={['admin', 'staff', 'verifier', 'leader']}><PersonelListPage /></ProtectedRoute>} />
       <Route path="/personel/baru" element={<ProtectedRoute allowedRoles={['admin', 'staff']}><PersonelFormPage /></ProtectedRoute>} />
-      <Route path="/personel/:nrp" element={<ProtectedRoute><PersonelDetailPage /></ProtectedRoute>} />
+      <Route path="/personel/:nrp" element={<ProtectedRoute allowedRoles={['admin', 'staff', 'verifier', 'leader']}><PersonelDetailPage /></ProtectedRoute>} />
       <Route path="/personel/:nrp/edit" element={<ProtectedRoute allowedRoles={['admin', 'staff']}><PersonelFormPage /></ProtectedRoute>} />
       
-      {/* Pengajuan */}
+      {/* Personnel (User Personel) Pages */}
+      <Route path="/profil-saya" element={<ProtectedRoute allowedRoles={['personnel']}><ProfilSayaPage /></ProtectedRoute>} />
+      <Route path="/pengajuan-saya" element={<ProtectedRoute allowedRoles={['personnel']}><PengajuanSayaPage /></ProtectedRoute>} />
+      <Route path="/pengaturan" element={<ProtectedRoute><PengaturanPage /></ProtectedRoute>} />
+      
+      {/* Pengajuan - Admin/Staff */}
       <Route path="/pengajuan" element={<ProtectedRoute allowedRoles={['admin', 'staff']}><PengajuanPage /></ProtectedRoute>} />
       
       {/* Verifikasi */}
@@ -109,15 +123,9 @@ function AppRoutes() {
       {/* Kesejahteraan */}
       <Route path="/kesejahteraan" element={<ProtectedRoute allowedRoles={['admin', 'staff']}><PersonelListPage /></ProtectedRoute>} />
       
-      {/* Profil Saya (Personnel) */}
-      <Route path="/profil-saya" element={<ProtectedRoute allowedRoles={['personnel']}><DashboardPage /></ProtectedRoute>} />
-      
-      {/* Pengajuan Saya (Personnel) */}
-      <Route path="/pengajuan-saya" element={<ProtectedRoute allowedRoles={['personnel']}><DashboardPage /></ProtectedRoute>} />
-      
-      {/* Default */}
-      <Route path="/" element={<Navigate to="/dashboard" replace />} />
-      <Route path="*" element={<Navigate to="/dashboard" replace />} />
+      {/* Default - redirect based on role */}
+      <Route path="/" element={<Navigate to={user?.role === 'personnel' ? '/dashboard-personel' : '/dashboard'} replace />} />
+      <Route path="*" element={<Navigate to={user?.role === 'personnel' ? '/dashboard-personel' : '/dashboard'} replace />} />
     </Routes>
   );
 }
