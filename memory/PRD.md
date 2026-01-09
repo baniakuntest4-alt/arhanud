@@ -93,8 +93,8 @@ Membangun aplikasi web internal untuk kepegawaian militer TNI AD (Arhanud) denga
 
 ## Next Action Items
 1. ~~Tambahkan field TAHUN untuk DIKBANG (Pendidikan Pengembangan)~~ ✅ DONE
-2. Build halaman-halaman lainnya (Riwayat, Prestasi, Kesejahteraan, dll)
-3. Implementasi Master Data Management UI
+2. ~~Master Data Management UI~~ ✅ DONE
+3. Build halaman-halaman lainnya (Riwayat, Prestasi, Kesejahteraan, dll)
 4. Test alur verifikasi end-to-end
 5. Tambah fitur export PDF
 
