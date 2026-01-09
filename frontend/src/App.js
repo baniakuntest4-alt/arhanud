@@ -6,20 +6,19 @@ import { Toaster } from './components/ui/sonner';
 // Pages
 import LoginPage from './pages/LoginPage';
 import DashboardPage from './pages/DashboardPage';
-import PersonnelListPage from './pages/PersonnelListPage';
-import PersonnelDetailPage from './pages/PersonnelDetailPage';
-import PersonnelFormPage from './pages/PersonnelFormPage';
-import VerificationPage from './pages/VerificationPage';
+import PersonelListPage from './pages/PersonelListPage';
+import PersonelDetailPage from './pages/PersonelDetailPage';
+import PersonelFormPage from './pages/PersonelFormPage';
+import VerifikasiPage from './pages/VerifikasiPage';
 import UserManagementPage from './pages/UserManagementPage';
 import AuditLogPage from './pages/AuditLogPage';
 import ReportsPage from './pages/ReportsPage';
-import MutationsPage from './pages/MutationsPage';
-import MyProfilePage from './pages/MyProfilePage';
+import PengajuanPage from './pages/PengajuanPage';
 
 // Components
 import Layout from './components/Layout';
 
-// Protected Route Component
+// Protected Route
 const ProtectedRoute = ({ children, allowedRoles }) => {
   const { isAuthenticated, loading, user } = useAuth();
 
@@ -45,17 +44,14 @@ const ProtectedRoute = ({ children, allowedRoles }) => {
   return <Layout>{children}</Layout>;
 };
 
-// Public Route Component
+// Public Route
 const PublicRoute = ({ children }) => {
   const { isAuthenticated, loading } = useAuth();
 
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="text-center">
-          <div className="w-12 h-12 border-4 border-[#4A5D23] border-t-transparent rounded-full animate-spin mx-auto"></div>
-          <p className="mt-4 text-muted-foreground">Memuat...</p>
-        </div>
+        <div className="w-12 h-12 border-4 border-[#4A5D23] border-t-transparent rounded-full animate-spin"></div>
       </div>
     );
   }
@@ -70,40 +66,52 @@ const PublicRoute = ({ children }) => {
 function AppRoutes() {
   return (
     <Routes>
-      {/* Public Routes */}
+      {/* Public */}
       <Route path="/login" element={<PublicRoute><LoginPage /></PublicRoute>} />
       
-      {/* Protected Routes */}
+      {/* Dashboard */}
       <Route path="/dashboard" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
       
-      {/* Personnel Routes */}
-      <Route path="/personnel" element={<ProtectedRoute><PersonnelListPage /></ProtectedRoute>} />
-      <Route path="/personnel/new" element={<ProtectedRoute allowedRoles={['admin', 'staff']}><PersonnelFormPage /></ProtectedRoute>} />
-      <Route path="/personnel/:id" element={<ProtectedRoute><PersonnelDetailPage /></ProtectedRoute>} />
-      <Route path="/personnel/:id/edit" element={<ProtectedRoute allowedRoles={['admin', 'staff']}><PersonnelFormPage /></ProtectedRoute>} />
+      {/* Personel */}
+      <Route path="/personel" element={<ProtectedRoute><PersonelListPage /></ProtectedRoute>} />
+      <Route path="/personel/baru" element={<ProtectedRoute allowedRoles={['admin', 'staff']}><PersonelFormPage /></ProtectedRoute>} />
+      <Route path="/personel/:nrp" element={<ProtectedRoute><PersonelDetailPage /></ProtectedRoute>} />
+      <Route path="/personel/:nrp/edit" element={<ProtectedRoute allowedRoles={['admin', 'staff']}><PersonelFormPage /></ProtectedRoute>} />
       
-      {/* Verification Routes */}
-      <Route path="/verification" element={<ProtectedRoute allowedRoles={['verifier']}><VerificationPage /></ProtectedRoute>} />
+      {/* Pengajuan */}
+      <Route path="/pengajuan" element={<ProtectedRoute allowedRoles={['admin', 'staff']}><PengajuanPage /></ProtectedRoute>} />
       
-      {/* User Management */}
+      {/* Verifikasi */}
+      <Route path="/verifikasi" element={<ProtectedRoute allowedRoles={['verifier']}><VerifikasiPage /></ProtectedRoute>} />
+      
+      {/* Users */}
       <Route path="/users" element={<ProtectedRoute allowedRoles={['admin']}><UserManagementPage /></ProtectedRoute>} />
+      
+      {/* Master Data */}
+      <Route path="/master-data" element={<ProtectedRoute allowedRoles={['admin']}><DashboardPage /></ProtectedRoute>} />
+      
+      {/* Laporan */}
+      <Route path="/laporan" element={<ProtectedRoute allowedRoles={['admin', 'staff', 'verifier', 'leader']}><ReportsPage /></ProtectedRoute>} />
       
       {/* Audit Log */}
       <Route path="/audit-log" element={<ProtectedRoute allowedRoles={['admin', 'leader']}><AuditLogPage /></ProtectedRoute>} />
       
-      {/* Reports */}
-      <Route path="/reports" element={<ProtectedRoute allowedRoles={['admin', 'staff', 'verifier', 'leader']}><ReportsPage /></ProtectedRoute>} />
+      {/* Dikbang */}
+      <Route path="/dikbang" element={<ProtectedRoute allowedRoles={['admin', 'staff']}><PersonelListPage /></ProtectedRoute>} />
       
-      {/* Mutations */}
-      <Route path="/mutations" element={<ProtectedRoute allowedRoles={['admin', 'staff']}><MutationsPage /></ProtectedRoute>} />
+      {/* Prestasi */}
+      <Route path="/prestasi" element={<ProtectedRoute allowedRoles={['admin', 'staff']}><PersonelListPage /></ProtectedRoute>} />
       
-      {/* Personnel Profile (for personnel role) */}
-      <Route path="/my-profile" element={<ProtectedRoute allowedRoles={['personnel']}><MyProfilePage /></ProtectedRoute>} />
+      {/* Kesejahteraan */}
+      <Route path="/kesejahteraan" element={<ProtectedRoute allowedRoles={['admin', 'staff']}><PersonelListPage /></ProtectedRoute>} />
       
-      {/* Corrections (for personnel) */}
-      <Route path="/corrections" element={<ProtectedRoute allowedRoles={['personnel']}><MyProfilePage /></ProtectedRoute>} />
+      {/* Profil Saya (Personnel) */}
+      <Route path="/profil-saya" element={<ProtectedRoute allowedRoles={['personnel']}><DashboardPage /></ProtectedRoute>} />
       
-      {/* Default redirect */}
+      {/* Pengajuan Saya (Personnel) */}
+      <Route path="/pengajuan-saya" element={<ProtectedRoute allowedRoles={['personnel']}><DashboardPage /></ProtectedRoute>} />
+      
+      {/* Default */}
       <Route path="/" element={<Navigate to="/dashboard" replace />} />
       <Route path="*" element={<Navigate to="/dashboard" replace />} />
     </Routes>
