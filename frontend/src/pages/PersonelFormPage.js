@@ -6,7 +6,9 @@ import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
 import { Textarea } from '../components/ui/textarea';
+import { Badge } from '../components/ui/badge';
 import { Alert, AlertDescription } from '../components/ui/alert';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
 import {
   Select,
   SelectContent,
@@ -14,7 +16,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '../components/ui/select';
-import { ArrowLeft, Save, Loader2, AlertCircle, CheckCircle } from 'lucide-react';
+import { ArrowLeft, Save, Loader2, AlertCircle, CheckCircle, Plus, Trash2, GraduationCap } from 'lucide-react';
 
 export const PersonelFormPage = () => {
   const { api } = useAuth();
