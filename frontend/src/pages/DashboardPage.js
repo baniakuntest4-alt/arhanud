@@ -218,6 +218,40 @@ export const DashboardPage = () => {
         </p>
       </div>
 
+      {/* Alert for Pending Pengajuan - Show for Admin, Staff, Verifier */}
+      {(user?.role === 'admin' || user?.role === 'staff' || user?.role === 'verifier') && pendingCount > 0 && (
+        <Card className="border-yellow-300 bg-yellow-50">
+          <CardContent className="pt-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 rounded-full bg-yellow-100 flex items-center justify-center">
+                  <AlertCircle className="w-6 h-6 text-yellow-600" />
+                </div>
+                <div>
+                  <p className="font-bold text-yellow-800">
+                    {pendingCount} Pengajuan Menunggu {user?.role === 'verifier' ? 'Verifikasi' : 'Proses'}
+                  </p>
+                  <p className="text-sm text-yellow-700">
+                    {user?.role === 'verifier' 
+                      ? 'Silakan review dan verifikasi pengajuan yang masuk'
+                      : 'Ada pengajuan yang perlu ditindaklanjuti'
+                    }
+                  </p>
+                </div>
+              </div>
+              <Button 
+                className="bg-yellow-600 hover:bg-yellow-700"
+                onClick={() => navigate(user?.role === 'verifier' ? '/verifikasi' : '/pengajuan')}
+                data-testid="btn-lihat-pengajuan"
+              >
+                Lihat Sekarang
+                <ChevronRight className="w-4 h-4 ml-1" />
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Stats Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard
@@ -235,10 +269,10 @@ export const DashboardPage = () => {
           loading={loading}
         />
         <StatCard
-          title="Menunggu Verifikasi"
-          value={stats?.pending_pengajuan || 0}
+          title="Pengajuan Pending"
+          value={pendingCount}
           icon={FileCheck}
-          description="Pengajuan pending"
+          description="Menunggu verifikasi"
           color="bg-amber-500"
           loading={loading}
         />
