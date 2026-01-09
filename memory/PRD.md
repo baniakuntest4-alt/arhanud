@@ -3,7 +3,7 @@
 ## Informasi Proyek
 - **Nama**: SIPARHANUD (Sistem Informasi Personel Arhanud)
 - **Tanggal Dibuat**: 8 Januari 2025
-- **Status**: MVP Selesai, Refactoring In Progress
+- **Status**: MVP Complete, Features In Progress
 - **Last Updated**: 9 Januari 2025
 
 ## Problem Statement
@@ -12,12 +12,13 @@ Membangun aplikasi web internal untuk kepegawaian militer TNI AD (Arhanud) denga
 - Data personel lengkap (NRP, pangkat, jabatan, pendidikan, prestasi)
 - Alur verifikasi untuk perubahan data
 - Import data dari Excel
-- Laporan yang bisa diunduh
+- Laporan yang bisa diunduh (PDF/Excel)
 - Audit log untuk setiap aktivitas
+- Upload dokumen pendukung
 
 ## User Personas
-1. **Administrator** - Mengelola akun pengguna, tidak bisa ubah data kepegawaian
-2. **Staf Kepegawaian** - Input dan kelola data personel, ajukan mutasi/pensiun
+1. **Administrator** - Mengelola akun pengguna, master data referensi
+2. **Staf Kepegawaian** - Input dan kelola data personel, upload dokumen
 3. **Pejabat Verifikator** - Verifikasi dan setujui/tolak pengajuan
 4. **Pimpinan** - Lihat dashboard dan laporan saja
 5. **Personel** - Lihat data diri, ajukan koreksi
@@ -30,7 +31,10 @@ Membangun aplikasi web internal untuk kepegawaian militer TNI AD (Arhanud) denga
 - [x] Pengajuan Koreksi Data (Personel)
 - [x] Verifikasi & Persetujuan
 - [x] Dashboard dengan statistik
-- [x] Laporan (Export CSV/JSON)
+- [x] Export Laporan Excel
+- [x] Export Laporan PDF
+- [x] Export Statistik Excel
+- [x] Upload Dokumen Personel
 - [x] Audit Log
 
 ## What's Been Implemented (8 Jan 2025)
