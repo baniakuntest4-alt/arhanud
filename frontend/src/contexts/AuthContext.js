@@ -18,13 +18,38 @@ export const AuthProvider = ({ children }) => {
   const [token, setToken] = useState(localStorage.getItem('token'));
   const [loading, setLoading] = useState(true);
 
+  const api = axios.create({
+    baseURL: API_URL,
+  });
+
+  // Add token to requests
+  api.interceptors.request.use((config) => {
+    const currentToken = localStorage.getItem('token');
+    if (currentToken) {
+      config.headers.Authorization = `Bearer ${currentToken}`;
+    }
+    return config;
+  });
+
+  // Handle 401 errors
+  api.interceptors.response.use(
+    (response) => response,
+    (error) => {
+      if (error.response?.status === 401) {
+        localStorage.removeItem('token');
+        setToken(null);
+        setUser(null);
+      }
+      return Promise.reject(error);
+    }
+  );
+
   useEffect(() => {
     const initAuth = async () => {
-      if (token) {
+      const storedToken = localStorage.getItem('token');
+      if (storedToken) {
         try {
-          const response = await axios.get(`${API_URL}/auth/me`, {
-            headers: { Authorization: `Bearer ${token}` }
-          });
+          const response = await api.get('/auth/me');
           setUser(response.data);
         } catch (error) {
           console.error('Auth init error:', error);
@@ -36,10 +61,10 @@ export const AuthProvider = ({ children }) => {
       setLoading(false);
     };
     initAuth();
-  }, [token]);
+  }, []);
 
   const login = async (username, password) => {
-    const response = await axios.post(`${API_URL}/auth/login`, { username, password });
+    const response = await api.post('/auth/login', { username, password });
     const { access_token, user: userData } = response.data;
     localStorage.setItem('token', access_token);
     setToken(access_token);
@@ -49,9 +74,7 @@ export const AuthProvider = ({ children }) => {
 
   const logout = async () => {
     try {
-      await axios.post(`${API_URL}/auth/logout`, {}, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      await api.post('/auth/logout');
     } catch (error) {
       console.error('Logout error:', error);
     }
@@ -60,25 +83,18 @@ export const AuthProvider = ({ children }) => {
     setUser(null);
   };
 
-  const api = axios.create({
-    baseURL: API_URL,
-    headers: token ? { Authorization: `Bearer ${token}` } : {}
-  });
-
-  api.interceptors.response.use(
-    response => response,
-    error => {
-      if (error.response?.status === 401) {
-        localStorage.removeItem('token');
-        setToken(null);
-        setUser(null);
-      }
-      return Promise.reject(error);
-    }
-  );
+  const value = {
+    user,
+    token,
+    loading,
+    login,
+    logout,
+    api,
+    isAuthenticated: !!user,
+  };
 
   return (
-    <AuthContext.Provider value={{ user, token, loading, login, logout, api, isAuthenticated: !!user }}>
+    <AuthContext.Provider value={value}>
       {children}
     </AuthContext.Provider>
   );
