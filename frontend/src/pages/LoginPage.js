@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
@@ -11,6 +12,7 @@ const LOGO_URL = 'https://customer-assets.emergentagent.com/job_armypersonnel/ar
 
 export const LoginPage = () => {
   const { login } = useAuth();
+  const navigate = useNavigate();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -22,7 +24,13 @@ export const LoginPage = () => {
     setLoading(true);
     
     try {
-      await login(username, password);
+      const userData = await login(username, password);
+      // Redirect based on role
+      if (userData?.role === 'personnel') {
+        navigate('/dashboard-personel', { replace: true });
+      } else {
+        navigate('/dashboard', { replace: true });
+      }
     } catch (err) {
       setError(err.response?.data?.detail || 'Login gagal. Periksa username dan password.');
     } finally {
