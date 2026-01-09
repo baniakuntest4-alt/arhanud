@@ -92,10 +92,24 @@ Membangun aplikasi web internal untuk kepegawaian militer TNI AD (Arhanud) denga
 - [ ] Import keluarga dari Excel
 
 ## Next Action Items
-1. Import data personel dari file Excel yang sudah diupload user
-2. Test alur verifikasi end-to-end
-3. Tambah fitur export PDF
-4. Implementasi notifikasi
+1. Tambahkan field TAHUN untuk DIKBANG (Pendidikan Pengembangan)
+2. Build halaman-halaman lainnya (Riwayat, Prestasi, Kesejahteraan, dll)
+3. Implementasi Master Data Management UI
+4. Test alur verifikasi end-to-end
+5. Tambah fitur export PDF
+
+## Bug Fix Log (9 Jan 2025)
+- **Fixed**: Pangkat kosong di Dashboard - Penyebab: `status_personel` tersimpan sebagai `ACTIVE` (EN) bukan `AKTIF` (ID). Updated 15 dokumen untuk konsistensi.
+- **Fixed**: Distribusi Pangkat menampilkan "Tidak ada data" - Sama dengan di atas, aggregation query tidak menemukan data karena filter `status_personel: AKTIF` tidak match.
+
+## Database Schema (Refactored)
+Aplikasi menggunakan schema multi-koleksi yang ternormalisasi:
+- **Reference Tables**: `ref_pangkat`, `ref_jabatan`, `ref_satuan`, `ref_korps`, `ref_agama`, `ref_jenis_diklat`
+- **Core Data**: `personel` (master data)
+- **Historical Data**: `riwayat_pangkat`, `riwayat_jabatan`, `dikbang` (pendidikan)
+- **Supporting Data**: `prestasi`, `tanda_jasa`, `keluarga`, `kesejahteraan`, `kesjas`
+- **Workflow**: `pengajuan`, `audit_logs`
+- **Users**: `users`
 
 ## Default Users
 | Username | Password | Role |
