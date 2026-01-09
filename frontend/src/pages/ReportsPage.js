@@ -30,8 +30,8 @@ export const ReportsPage = () => {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [filters, setFilters] = useState({
-    kategori: '',
-    status: ''
+    kategori: 'ALL',
+    status: 'ALL'
   });
 
   const downloadFile = async (url, filename) => {
