@@ -603,15 +603,26 @@ async def get_all_pengajuan(
     return data
 
 @api_router.post("/pengajuan")
-async def create_pengajuan(data: dict = Body(...), user: dict = Depends(require_roles(UserRole.ADMIN, UserRole.STAFF))):
-    personel = await db.personel.find_one({"nrp": data["nrp"]})
+async def create_pengajuan(data: dict = Body(...), user: dict = Depends(get_current_user)):
+    """Create new pengajuan - Personnel can create koreksi for their own data"""
+    nrp = data.get("nrp")
+    
+    # Personnel can only create pengajuan for themselves
+    if user["role"] == "personnel":
+        if nrp != user.get("nrp"):
+            raise HTTPException(status_code=403, detail="Anda hanya dapat mengajukan koreksi untuk data diri sendiri")
+        # Personnel can only create koreksi type
+        if data.get("jenis_pengajuan") != "koreksi":
+            raise HTTPException(status_code=403, detail="Personel hanya dapat mengajukan koreksi data")
+    
+    personel = await db.personel.find_one({"nrp": nrp})
     if not personel:
         raise HTTPException(status_code=404, detail="Personel tidak ditemukan")
     
     data["id"] = generate_id()
     data["status"] = "pending"
     data["created_by"] = user["id"]
-    data["created_by_name"] = user["nama_lengkap"]
+    data["created_by_name"] = user.get("nama_lengkap", user["username"])
     data["created_at"] = now_isoformat()
     
     await db.pengajuan.insert_one(data)
