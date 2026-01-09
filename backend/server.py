@@ -1004,6 +1004,524 @@ async def create_custom_field(data: dict = Body(...), user: dict = Depends(requi
     await create_audit_log(user["id"], user["username"], "CREATE_CUSTOM_FIELD", "custom_fields", data["id"])
     return {"message": "Custom field berhasil ditambahkan", "id": data["id"]}
 
+# ================== FILE UPLOAD (DOCUMENTS) ==================
+import os
+import shutil
+from fastapi.responses import FileResponse
+
+UPLOAD_DIR = Path("/app/uploads")
+UPLOAD_DIR.mkdir(exist_ok=True)
+
+ALLOWED_EXTENSIONS = {'.pdf', '.jpg', '.jpeg', '.png', '.doc', '.docx'}
+MAX_FILE_SIZE = 10 * 1024 * 1024  # 10MB
+
+@api_router.get("/personel/{nrp}/documents")
+async def get_personel_documents(nrp: str, user: dict = Depends(get_current_user)):
+    """Get all documents for a personel"""
+    # Personnel can only access own documents
+    if user["role"] == "personnel" and user.get("nrp") != nrp:
+        raise HTTPException(status_code=403, detail="Akses ditolak")
+    
+    documents = await db.documents.find({"nrp": nrp}, {"_id": 0}).sort("created_at", -1).to_list(100)
+    return documents
+
+@api_router.post("/personel/{nrp}/documents")
+async def upload_document(
+    nrp: str,
+    file: UploadFile = File(...),
+    jenis_dokumen: str = Query(..., description="Jenis dokumen: SK_PANGKAT, SK_JABATAN, IJAZAH, SERTIFIKAT, FOTO, LAINNYA"),
+    keterangan: str = Query("", description="Keterangan tambahan"),
+    user: dict = Depends(require_roles(UserRole.ADMIN, UserRole.STAFF))
+):
+    """Upload a document for a personel"""
+    # Validate personel exists
+    personel = await db.personel.find_one({"nrp": nrp})
+    if not personel:
+        raise HTTPException(status_code=404, detail="Personel tidak ditemukan")
+    
+    # Validate file extension
+    file_ext = Path(file.filename).suffix.lower()
+    if file_ext not in ALLOWED_EXTENSIONS:
+        raise HTTPException(status_code=400, detail=f"Format file tidak didukung. Gunakan: {', '.join(ALLOWED_EXTENSIONS)}")
+    
+    # Read and validate file size
+    content = await file.read()
+    if len(content) > MAX_FILE_SIZE:
+        raise HTTPException(status_code=400, detail="Ukuran file maksimal 10MB")
+    
+    # Create directory for personel
+    personel_dir = UPLOAD_DIR / nrp
+    personel_dir.mkdir(exist_ok=True)
+    
+    # Generate unique filename
+    doc_id = generate_id()
+    filename = f"{doc_id}{file_ext}"
+    file_path = personel_dir / filename
+    
+    # Save file
+    with open(file_path, "wb") as f:
+        f.write(content)
+    
+    # Save to database
+    doc_data = {
+        "id": doc_id,
+        "nrp": nrp,
+        "jenis_dokumen": jenis_dokumen,
+        "nama_file": file.filename,
+        "filename_stored": filename,
+        "file_path": str(file_path),
+        "file_size": len(content),
+        "file_type": file_ext,
+        "keterangan": keterangan,
+        "uploaded_by": user["id"],
+        "uploaded_by_name": user.get("nama_lengkap", user["username"]),
+        "created_at": now_isoformat()
+    }
+    
+    await db.documents.insert_one(doc_data)
+    await create_audit_log(user["id"], user["username"], "UPLOAD_DOCUMENT", "documents", doc_id)
+    
+    return {"message": "Dokumen berhasil diupload", "id": doc_id, "filename": file.filename}
+
+@api_router.get("/documents/{doc_id}/download")
+async def download_document(doc_id: str, user: dict = Depends(get_current_user)):
+    """Download a document"""
+    doc = await db.documents.find_one({"id": doc_id}, {"_id": 0})
+    if not doc:
+        raise HTTPException(status_code=404, detail="Dokumen tidak ditemukan")
+    
+    # Personnel can only download own documents
+    if user["role"] == "personnel" and user.get("nrp") != doc["nrp"]:
+        raise HTTPException(status_code=403, detail="Akses ditolak")
+    
+    file_path = Path(doc["file_path"])
+    if not file_path.exists():
+        raise HTTPException(status_code=404, detail="File tidak ditemukan di server")
+    
+    return FileResponse(
+        path=file_path,
+        filename=doc["nama_file"],
+        media_type="application/octet-stream"
+    )
+
+@api_router.delete("/documents/{doc_id}")
+async def delete_document(doc_id: str, user: dict = Depends(require_roles(UserRole.ADMIN, UserRole.STAFF))):
+    """Delete a document"""
+    doc = await db.documents.find_one({"id": doc_id}, {"_id": 0})
+    if not doc:
+        raise HTTPException(status_code=404, detail="Dokumen tidak ditemukan")
+    
+    # Delete file from disk
+    file_path = Path(doc["file_path"])
+    if file_path.exists():
+        file_path.unlink()
+    
+    # Delete from database
+    await db.documents.delete_one({"id": doc_id})
+    await create_audit_log(user["id"], user["username"], "DELETE_DOCUMENT", "documents", doc_id)
+    
+    return {"message": "Dokumen berhasil dihapus"}
+
+# ================== EXPORT REPORTS PDF/EXCEL ==================
+from fastapi.responses import StreamingResponse
+from reportlab.lib import colors
+from reportlab.lib.pagesizes import A4, landscape
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.lib.units import cm, mm
+from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer, Image
+from reportlab.pdfbase import pdfmetrics
+from reportlab.pdfbase.ttfonts import TTFont
+import xlsxwriter
+
+@api_router.get("/export/personel/excel")
+async def export_personel_excel(
+    kategori: Optional[str] = None,
+    status: Optional[str] = None,
+    user: dict = Depends(require_roles(UserRole.ADMIN, UserRole.STAFF, UserRole.LEADER))
+):
+    """Export daftar personel ke Excel"""
+    query = {}
+    if kategori:
+        query["kategori"] = kategori
+    if status:
+        query["status_personel"] = status
+    
+    personel_list = await db.personel.find(query, {"_id": 0}).sort([("kategori", 1), ("pangkat", 1)]).to_list(10000)
+    
+    # Create Excel file in memory
+    output = io.BytesIO()
+    workbook = xlsxwriter.Workbook(output, {'in_memory': True})
+    worksheet = workbook.add_worksheet('Data Personel')
+    
+    # Styles
+    header_format = workbook.add_format({
+        'bold': True,
+        'bg_color': '#4A5D23',
+        'font_color': 'white',
+        'border': 1,
+        'align': 'center',
+        'valign': 'vcenter'
+    })
+    cell_format = workbook.add_format({
+        'border': 1,
+        'align': 'left',
+        'valign': 'vcenter'
+    })
+    
+    # Headers
+    headers = ['No', 'NRP', 'Nama Lengkap', 'Pangkat', 'Kategori', 'Jabatan', 'Satuan', 'Status']
+    for col, header in enumerate(headers):
+        worksheet.write(0, col, header, header_format)
+    
+    # Data
+    for row, p in enumerate(personel_list, start=1):
+        worksheet.write(row, 0, row, cell_format)
+        worksheet.write(row, 1, p.get('nrp', ''), cell_format)
+        worksheet.write(row, 2, p.get('nama_lengkap', ''), cell_format)
+        worksheet.write(row, 3, p.get('pangkat', ''), cell_format)
+        worksheet.write(row, 4, p.get('kategori', ''), cell_format)
+        worksheet.write(row, 5, p.get('jabatan_sekarang', ''), cell_format)
+        worksheet.write(row, 6, p.get('satuan_induk', ''), cell_format)
+        worksheet.write(row, 7, p.get('status_personel', ''), cell_format)
+    
+    # Set column widths
+    worksheet.set_column(0, 0, 5)   # No
+    worksheet.set_column(1, 1, 18)  # NRP
+    worksheet.set_column(2, 2, 35)  # Nama
+    worksheet.set_column(3, 3, 15)  # Pangkat
+    worksheet.set_column(4, 4, 12)  # Kategori
+    worksheet.set_column(5, 5, 30)  # Jabatan
+    worksheet.set_column(6, 6, 25)  # Satuan
+    worksheet.set_column(7, 7, 12)  # Status
+    
+    workbook.close()
+    output.seek(0)
+    
+    filename = f"data_personel_{datetime.now().strftime('%Y%m%d_%H%M%S')}.xlsx"
+    
+    await create_audit_log(user["id"], user["username"], "EXPORT_EXCEL", "personel", "all")
+    
+    return StreamingResponse(
+        output,
+        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        headers={"Content-Disposition": f"attachment; filename={filename}"}
+    )
+
+@api_router.get("/export/personel/pdf")
+async def export_personel_pdf(
+    kategori: Optional[str] = None,
+    status: Optional[str] = None,
+    user: dict = Depends(require_roles(UserRole.ADMIN, UserRole.STAFF, UserRole.LEADER))
+):
+    """Export daftar personel ke PDF"""
+    query = {}
+    if kategori:
+        query["kategori"] = kategori
+    if status:
+        query["status_personel"] = status
+    
+    personel_list = await db.personel.find(query, {"_id": 0}).sort([("kategori", 1), ("pangkat", 1)]).to_list(10000)
+    
+    # Create PDF in memory
+    buffer = io.BytesIO()
+    doc = SimpleDocTemplate(buffer, pagesize=landscape(A4), 
+                           leftMargin=1*cm, rightMargin=1*cm,
+                           topMargin=1*cm, bottomMargin=1*cm)
+    
+    elements = []
+    styles = getSampleStyleSheet()
+    
+    # Title
+    title_style = ParagraphStyle(
+        'CustomTitle',
+        parent=styles['Heading1'],
+        fontSize=16,
+        alignment=1,  # Center
+        spaceAfter=20
+    )
+    elements.append(Paragraph("DAFTAR PERSONEL ARHANUD", title_style))
+    
+    # Subtitle
+    subtitle = f"Tanggal: {datetime.now().strftime('%d-%m-%Y %H:%M')}"
+    if kategori:
+        subtitle += f" | Kategori: {kategori}"
+    if status:
+        subtitle += f" | Status: {status}"
+    elements.append(Paragraph(subtitle, styles['Normal']))
+    elements.append(Spacer(1, 20))
+    
+    # Table data
+    table_data = [['No', 'NRP', 'Nama Lengkap', 'Pangkat', 'Kategori', 'Jabatan', 'Status']]
+    
+    for idx, p in enumerate(personel_list, start=1):
+        table_data.append([
+            str(idx),
+            p.get('nrp', ''),
+            p.get('nama_lengkap', '')[:40],  # Truncate long names
+            p.get('pangkat', ''),
+            p.get('kategori', ''),
+            (p.get('jabatan_sekarang', '') or '')[:30],
+            p.get('status_personel', '')
+        ])
+    
+    # Create table
+    col_widths = [1*cm, 4*cm, 6*cm, 3*cm, 2.5*cm, 6*cm, 2.5*cm]
+    table = Table(table_data, colWidths=col_widths, repeatRows=1)
+    
+    table.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#4A5D23')),
+        ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
+        ('ALIGN', (0, 0), (-1, 0), 'CENTER'),
+        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+        ('FONTSIZE', (0, 0), (-1, 0), 9),
+        ('BOTTOMPADDING', (0, 0), (-1, 0), 8),
+        ('BACKGROUND', (0, 1), (-1, -1), colors.white),
+        ('TEXTCOLOR', (0, 1), (-1, -1), colors.black),
+        ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
+        ('FONTSIZE', (0, 1), (-1, -1), 8),
+        ('ALIGN', (0, 1), (0, -1), 'CENTER'),
+        ('GRID', (0, 0), (-1, -1), 0.5, colors.grey),
+        ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+        ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, colors.HexColor('#f5f5f5')]),
+    ]))
+    
+    elements.append(table)
+    
+    # Footer
+    elements.append(Spacer(1, 20))
+    elements.append(Paragraph(f"Total: {len(personel_list)} personel", styles['Normal']))
+    
+    doc.build(elements)
+    buffer.seek(0)
+    
+    filename = f"data_personel_{datetime.now().strftime('%Y%m%d_%H%M%S')}.pdf"
+    
+    await create_audit_log(user["id"], user["username"], "EXPORT_PDF", "personel", "all")
+    
+    return StreamingResponse(
+        buffer,
+        media_type="application/pdf",
+        headers={"Content-Disposition": f"attachment; filename={filename}"}
+    )
+
+@api_router.get("/export/personel/{nrp}/pdf")
+async def export_personel_detail_pdf(nrp: str, user: dict = Depends(get_current_user)):
+    """Export biodata personel individu ke PDF"""
+    # Personnel can only export own data
+    if user["role"] == "personnel" and user.get("nrp") != nrp:
+        raise HTTPException(status_code=403, detail="Akses ditolak")
+    
+    personel = await db.personel.find_one({"nrp": nrp}, {"_id": 0})
+    if not personel:
+        raise HTTPException(status_code=404, detail="Personel tidak ditemukan")
+    
+    # Get related data
+    dikbang = await db.dikbang.find({"nrp": nrp}, {"_id": 0}).to_list(100)
+    keluarga = await db.keluarga.find({"nrp": nrp}, {"_id": 0}).to_list(100)
+    
+    # Create PDF
+    buffer = io.BytesIO()
+    doc = SimpleDocTemplate(buffer, pagesize=A4,
+                           leftMargin=2*cm, rightMargin=2*cm,
+                           topMargin=2*cm, bottomMargin=2*cm)
+    
+    elements = []
+    styles = getSampleStyleSheet()
+    
+    # Title
+    title_style = ParagraphStyle(
+        'CustomTitle',
+        parent=styles['Heading1'],
+        fontSize=14,
+        alignment=1,
+        spaceAfter=10
+    )
+    elements.append(Paragraph("BIODATA PERSONEL", title_style))
+    elements.append(Paragraph("SATUAN ARHANUD", styles['Normal']))
+    elements.append(Spacer(1, 20))
+    
+    # Personal Info Table
+    personal_data = [
+        ['NRP', personel.get('nrp', '-')],
+        ['Nama Lengkap', personel.get('nama_lengkap', '-')],
+        ['Pangkat', personel.get('pangkat', '-')],
+        ['Korps', personel.get('korps', '-')],
+        ['Kategori', personel.get('kategori', '-')],
+        ['Tempat/Tgl Lahir', f"{personel.get('tempat_lahir', '-')} / {personel.get('tanggal_lahir', '-')}"],
+        ['Jenis Kelamin', 'Laki-laki' if personel.get('jenis_kelamin') == 'L' else 'Perempuan'],
+        ['Agama', personel.get('agama', '-')],
+        ['Jabatan', personel.get('jabatan_sekarang', '-')],
+        ['Satuan', personel.get('satuan_induk', '-')],
+        ['TMT Pangkat', personel.get('tmt_pangkat', '-')],
+        ['TMT Masuk Dinas', personel.get('tmt_masuk_dinas', '-')],
+        ['Status', personel.get('status_personel', '-')],
+    ]
+    
+    personal_table = Table(personal_data, colWidths=[5*cm, 10*cm])
+    personal_table.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (0, -1), colors.HexColor('#f0f0f0')),
+        ('FONTNAME', (0, 0), (0, -1), 'Helvetica-Bold'),
+        ('FONTSIZE', (0, 0), (-1, -1), 10),
+        ('GRID', (0, 0), (-1, -1), 0.5, colors.grey),
+        ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+        ('LEFTPADDING', (0, 0), (-1, -1), 8),
+        ('RIGHTPADDING', (0, 0), (-1, -1), 8),
+        ('TOPPADDING', (0, 0), (-1, -1), 5),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 5),
+    ]))
+    elements.append(personal_table)
+    elements.append(Spacer(1, 20))
+    
+    # DIKBANG Section
+    if dikbang:
+        elements.append(Paragraph("<b>RIWAYAT PENDIDIKAN</b>", styles['Heading3']))
+        elements.append(Spacer(1, 10))
+        
+        dikbang_data = [['No', 'Jenis', 'Nama Pendidikan', 'Tahun', 'Hasil']]
+        for idx, d in enumerate(dikbang, 1):
+            dikbang_data.append([
+                str(idx),
+                d.get('jenis_diklat', '-'),
+                d.get('nama_diklat', '-'),
+                d.get('tahun', '-'),
+                d.get('hasil', '-')
+            ])
+        
+        dikbang_table = Table(dikbang_data, colWidths=[1*cm, 3*cm, 6*cm, 2*cm, 3*cm])
+        dikbang_table.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#4A5D23')),
+            ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
+            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+            ('FONTSIZE', (0, 0), (-1, -1), 9),
+            ('GRID', (0, 0), (-1, -1), 0.5, colors.grey),
+            ('ALIGN', (0, 0), (0, -1), 'CENTER'),
+            ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+        ]))
+        elements.append(dikbang_table)
+        elements.append(Spacer(1, 20))
+    
+    # Keluarga Section
+    if keluarga:
+        elements.append(Paragraph("<b>DATA KELUARGA</b>", styles['Heading3']))
+        elements.append(Spacer(1, 10))
+        
+        keluarga_data = [['No', 'Hubungan', 'Nama', 'Tgl Lahir', 'Pekerjaan']]
+        for idx, k in enumerate(keluarga, 1):
+            keluarga_data.append([
+                str(idx),
+                k.get('hubungan', '-'),
+                k.get('nama', '-'),
+                k.get('tanggal_lahir', '-'),
+                k.get('pekerjaan', '-')
+            ])
+        
+        keluarga_table = Table(keluarga_data, colWidths=[1*cm, 3*cm, 5*cm, 3*cm, 3*cm])
+        keluarga_table.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#4A5D23')),
+            ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
+            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+            ('FONTSIZE', (0, 0), (-1, -1), 9),
+            ('GRID', (0, 0), (-1, -1), 0.5, colors.grey),
+            ('ALIGN', (0, 0), (0, -1), 'CENTER'),
+            ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+        ]))
+        elements.append(keluarga_table)
+    
+    # Footer
+    elements.append(Spacer(1, 30))
+    elements.append(Paragraph(f"Dicetak pada: {datetime.now().strftime('%d-%m-%Y %H:%M')}", styles['Normal']))
+    
+    doc.build(elements)
+    buffer.seek(0)
+    
+    filename = f"biodata_{nrp}_{datetime.now().strftime('%Y%m%d')}.pdf"
+    
+    await create_audit_log(user["id"], user["username"], "EXPORT_PDF", "personel", nrp)
+    
+    return StreamingResponse(
+        buffer,
+        media_type="application/pdf",
+        headers={"Content-Disposition": f"attachment; filename={filename}"}
+    )
+
+@api_router.get("/export/statistik/excel")
+async def export_statistik_excel(user: dict = Depends(require_roles(UserRole.ADMIN, UserRole.STAFF, UserRole.LEADER))):
+    """Export statistik personel ke Excel"""
+    # Get stats
+    total = await db.personel.count_documents({})
+    aktif = await db.personel.count_documents({"status_personel": "AKTIF"})
+    
+    by_kategori = {}
+    for kategori in ["PERWIRA", "BINTARA", "TAMTAMA", "PNS"]:
+        count = await db.personel.count_documents({"kategori": kategori})
+        if count > 0:
+            by_kategori[kategori] = count
+    
+    by_pangkat_pipeline = [
+        {"$group": {"_id": "$pangkat", "count": {"$sum": 1}}},
+        {"$sort": {"count": -1}}
+    ]
+    by_pangkat_result = await db.personel.aggregate(by_pangkat_pipeline).to_list(100)
+    
+    # Create Excel
+    output = io.BytesIO()
+    workbook = xlsxwriter.Workbook(output, {'in_memory': True})
+    
+    # Summary sheet
+    summary_sheet = workbook.add_worksheet('Ringkasan')
+    header_format = workbook.add_format({'bold': True, 'bg_color': '#4A5D23', 'font_color': 'white', 'border': 1})
+    cell_format = workbook.add_format({'border': 1})
+    
+    summary_sheet.write(0, 0, 'STATISTIK PERSONEL ARHANUD', workbook.add_format({'bold': True, 'font_size': 14}))
+    summary_sheet.write(1, 0, f'Tanggal: {datetime.now().strftime("%d-%m-%Y %H:%M")}')
+    
+    summary_sheet.write(3, 0, 'Keterangan', header_format)
+    summary_sheet.write(3, 1, 'Jumlah', header_format)
+    summary_sheet.write(4, 0, 'Total Personel', cell_format)
+    summary_sheet.write(4, 1, total, cell_format)
+    summary_sheet.write(5, 0, 'Personel Aktif', cell_format)
+    summary_sheet.write(5, 1, aktif, cell_format)
+    
+    summary_sheet.set_column(0, 0, 25)
+    summary_sheet.set_column(1, 1, 15)
+    
+    # By Kategori sheet
+    kategori_sheet = workbook.add_worksheet('Per Kategori')
+    kategori_sheet.write(0, 0, 'Kategori', header_format)
+    kategori_sheet.write(0, 1, 'Jumlah', header_format)
+    row = 1
+    for kat, count in by_kategori.items():
+        kategori_sheet.write(row, 0, kat, cell_format)
+        kategori_sheet.write(row, 1, count, cell_format)
+        row += 1
+    kategori_sheet.set_column(0, 0, 20)
+    kategori_sheet.set_column(1, 1, 15)
+    
+    # By Pangkat sheet
+    pangkat_sheet = workbook.add_worksheet('Per Pangkat')
+    pangkat_sheet.write(0, 0, 'Pangkat', header_format)
+    pangkat_sheet.write(0, 1, 'Jumlah', header_format)
+    row = 1
+    for item in by_pangkat_result:
+        pangkat_sheet.write(row, 0, item['_id'] or '-', cell_format)
+        pangkat_sheet.write(row, 1, item['count'], cell_format)
+        row += 1
+    pangkat_sheet.set_column(0, 0, 20)
+    pangkat_sheet.set_column(1, 1, 15)
+    
+    workbook.close()
+    output.seek(0)
+    
+    filename = f"statistik_personel_{datetime.now().strftime('%Y%m%d_%H%M%S')}.xlsx"
+    
+    await create_audit_log(user["id"], user["username"], "EXPORT_EXCEL", "statistik", "all")
+    
+    return StreamingResponse(
+        output,
+        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        headers={"Content-Disposition": f"attachment; filename={filename}"}
+    )
+
 # ================== INITIALIZATION ==================
 @api_router.post("/init/setup")
 async def initialize_system():
