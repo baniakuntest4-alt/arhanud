@@ -18,6 +18,7 @@ import PengajuanPage from './pages/PengajuanPage';
 import ProfilSayaPage from './pages/ProfilSayaPage';
 import PengajuanSayaPage from './pages/PengajuanSayaPage';
 import PengaturanPage from './pages/PengaturanPage';
+import MasterDataPage from './pages/MasterDataPage';
 
 // Components
 import Layout from './components/Layout';
