@@ -105,9 +105,11 @@ Membangun aplikasi web internal untuk kepegawaian militer TNI AD (Arhanud) denga
 ## Next Action Items
 1. ~~Tambahkan field TAHUN untuk DIKBANG (Pendidikan Pengembangan)~~ ✅ DONE
 2. ~~Master Data Management UI~~ ✅ DONE
-3. Build halaman-halaman lainnya (Riwayat, Prestasi, Kesejahteraan, dll)
-4. Test alur verifikasi end-to-end
-5. Tambah fitur export PDF
+3. ~~Export Laporan PDF/Excel~~ ✅ DONE (9 Jan 2025)
+4. ~~Upload Dokumen Personel~~ ✅ DONE (9 Jan 2025)
+5. Build halaman-halaman lainnya (Prestasi, Kesejahteraan, Riwayat Karir)
+6. Test alur verifikasi end-to-end
+7. Sistem notifikasi untuk Personel
 
 ## Bug Fix Log (9 Jan 2025)
 - **Fixed**: Pangkat kosong di Dashboard - Penyebab: `status_personel` tersimpan sebagai `ACTIVE` (EN) bukan `AKTIF` (ID). Updated 15 dokumen untuk konsistensi.
