@@ -6,6 +6,7 @@ import { Toaster } from './components/ui/sonner';
 // Pages
 import LoginPage from './pages/LoginPage';
 import DashboardPage from './pages/DashboardPage';
+import DashboardPersonelPage from './pages/DashboardPersonelPage';
 import PersonelListPage from './pages/PersonelListPage';
 import PersonelDetailPage from './pages/PersonelDetailPage';
 import PersonelFormPage from './pages/PersonelFormPage';
@@ -14,6 +15,9 @@ import UserManagementPage from './pages/UserManagementPage';
 import AuditLogPage from './pages/AuditLogPage';
 import ReportsPage from './pages/ReportsPage';
 import PengajuanPage from './pages/PengajuanPage';
+import ProfilSayaPage from './pages/ProfilSayaPage';
+import PengajuanSayaPage from './pages/PengajuanSayaPage';
+import PengaturanPage from './pages/PengaturanPage';
 
 // Components
 import Layout from './components/Layout';
