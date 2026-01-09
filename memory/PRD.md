@@ -118,6 +118,11 @@ Membangun aplikasi web internal untuk kepegawaian militer TNI AD (Arhanud) denga
   - Pengajuan Koreksi: Form ajukan koreksi data, riwayat pengajuan, status tracking
   - Pengaturan: Ganti password
   - Login redirect berdasarkan role (personnel -> /dashboard-personel)
+- **Added**: Dashboard Admin/Verifikator Improvements
+  - Alert kuning prominent jika ada pengajuan pending
+  - Counter "Pengajuan Pending" di stat cards
+  - Section "Pengajuan Terbaru" dengan daftar 5 pengajuan terakhir
+  - Aksi Cepat khusus untuk role Verifikator
 
 ## Database Schema (Refactored)
 Aplikasi menggunakan schema multi-koleksi yang ternormalisasi:
