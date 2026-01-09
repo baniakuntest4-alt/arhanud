@@ -79,7 +79,10 @@ Membangun aplikasi web internal untuk kepegawaian militer TNI AD (Arhanud) denga
 ### P1 (High Priority) - DONE
 - [x] Import Excel
 - [x] Dashboard stats
-- [x] Laporan export
+- [x] Laporan export Excel
+- [x] Laporan export PDF
+- [x] Export Statistik Excel
+- [x] Upload Dokumen Personel
 - [x] Audit log
 
 ### P2 (Medium Priority)
@@ -87,9 +90,13 @@ Membangun aplikasi web internal untuk kepegawaian militer TNI AD (Arhanud) denga
 - [ ] Riwayat jabatan dengan timeline visual
 - [ ] Notifikasi masa pensiun mendekati
 - [ ] Filter advanced di halaman personel
-- [ ] Export PDF untuk laporan
+- [ ] Implementasi halaman Prestasi, Kesejahteraan, Riwayat Karir
+- [ ] Full verification workflow (apply changes after approval)
+- [ ] User notification system
 
 ### P3 (Nice to Have)
+- [ ] PWA (Progressive Web App) untuk mobile
+- [ ] Custom fields yang bisa ditambah admin
 - [ ] Grafik statistik yang lebih detail
 - [ ] Print view untuk laporan
 - [ ] Bulk update personel
