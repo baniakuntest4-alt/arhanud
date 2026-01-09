@@ -71,9 +71,10 @@ const menuConfig = {
     { icon: History, label: 'Audit Log', path: '/audit-log' },
   ],
   personnel: [
-    { icon: LayoutDashboard, label: 'Dashboard', path: '/dashboard' },
-    { icon: Users, label: 'Data Diri', path: '/profil-saya' },
-    { icon: ClipboardList, label: 'Pengajuan Saya', path: '/pengajuan-saya' },
+    { icon: LayoutDashboard, label: 'Dashboard', path: '/dashboard-personel' },
+    { icon: Users, label: 'Profil Saya', path: '/profil-saya' },
+    { icon: ClipboardList, label: 'Pengajuan Koreksi', path: '/pengajuan-saya' },
+    { icon: Settings, label: 'Pengaturan', path: '/pengaturan' },
   ],
 };
 
