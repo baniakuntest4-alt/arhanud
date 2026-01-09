@@ -174,7 +174,7 @@ export const ReportsPage = () => {
             <div className="flex items-end">
               <Button 
                 variant="outline" 
-                onClick={() => setFilters({ kategori: '', status: '' })}
+                onClick={() => setFilters({ kategori: 'ALL', status: 'ALL' })}
               >
                 Reset Filter
               </Button>
