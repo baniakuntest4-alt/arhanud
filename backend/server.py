@@ -716,6 +716,34 @@ async def deactivate_user(user_id: str, admin: dict = Depends(require_roles(User
     await create_audit_log(admin["id"], admin["username"], "DEACTIVATE_USER", "user", user_id)
     return {"message": "User berhasil dinonaktifkan"}
 
+@api_router.put("/users/change-password")
+async def change_password(data: dict = Body(...), user: dict = Depends(get_current_user)):
+    """Change password for current user"""
+    current_password = data.get("current_password")
+    new_password = data.get("new_password")
+    
+    if not current_password or not new_password:
+        raise HTTPException(status_code=400, detail="Password lama dan baru harus diisi")
+    
+    if len(new_password) < 6:
+        raise HTTPException(status_code=400, detail="Password baru minimal 6 karakter")
+    
+    # Get user with password
+    user_data = await db.users.find_one({"id": user["id"]})
+    if not user_data:
+        raise HTTPException(status_code=404, detail="User tidak ditemukan")
+    
+    # Verify current password
+    if not verify_password(current_password, user_data["password"]):
+        raise HTTPException(status_code=400, detail="Password saat ini salah")
+    
+    # Update password
+    hashed = hash_password(new_password)
+    await db.users.update_one({"id": user["id"]}, {"$set": {"password": hashed, "updated_at": now_isoformat()}})
+    await create_audit_log(user["id"], user["username"], "CHANGE_PASSWORD", "user", user["id"])
+    
+    return {"message": "Password berhasil diubah"}
+
 # ================== AUDIT LOG ROUTES ==================
 @api_router.get("/audit-logs")
 async def get_audit_logs(
