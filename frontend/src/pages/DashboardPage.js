@@ -13,7 +13,11 @@ import {
   Award,
   UserPlus,
   FileText,
-  Shield
+  Shield,
+  AlertCircle,
+  ChevronRight,
+  CheckCircle,
+  XCircle
 } from 'lucide-react';
 
 const StatCard = ({ title, value, icon: Icon, description, color, loading }) => (
