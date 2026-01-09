@@ -149,7 +149,7 @@ export const ReportsPage = () => {
                   <SelectValue placeholder="Semua Kategori" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Semua Kategori</SelectItem>
+                  <SelectItem value="ALL">Semua Kategori</SelectItem>
                   <SelectItem value="PERWIRA">Perwira</SelectItem>
                   <SelectItem value="BINTARA">Bintara</SelectItem>
                   <SelectItem value="TAMTAMA">Tamtama</SelectItem>
@@ -164,7 +164,7 @@ export const ReportsPage = () => {
                   <SelectValue placeholder="Semua Status" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Semua Status</SelectItem>
+                  <SelectItem value="ALL">Semua Status</SelectItem>
                   <SelectItem value="AKTIF">Aktif</SelectItem>
                   <SelectItem value="PENSIUN">Pensiun</SelectItem>
                   <SelectItem value="MUTASI">Mutasi</SelectItem>
