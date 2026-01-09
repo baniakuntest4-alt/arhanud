@@ -102,6 +102,12 @@ Membangun aplikasi web internal untuk kepegawaian militer TNI AD (Arhanud) denga
 - **Fixed**: Pangkat kosong di Dashboard - Penyebab: `status_personel` tersimpan sebagai `ACTIVE` (EN) bukan `AKTIF` (ID). Updated 15 dokumen untuk konsistensi.
 - **Fixed**: Distribusi Pangkat menampilkan "Tidak ada data" - Sama dengan di atas, aggregation query tidak menemukan data karena filter `status_personel: AKTIF` tidak match.
 
+## Feature Update Log (9 Jan 2025)
+- **Added**: Field TAHUN untuk DIKBANG (Pendidikan Pengembangan)
+  - Updated 76 records dikbang dengan data tahun
+  - Frontend menampilkan tahun dalam badge yang jelas (hijau untuk DIKBANGUM, emas untuk DIKBANGSPES)
+  - Format: Nama Diklat - [TAHUN]
+
 ## Database Schema (Refactored)
 Aplikasi menggunakan schema multi-koleksi yang ternormalisasi:
 - **Reference Tables**: `ref_pangkat`, `ref_jabatan`, `ref_satuan`, `ref_korps`, `ref_agama`, `ref_jenis_diklat`
