@@ -141,6 +141,18 @@ Membangun aplikasi web internal untuk kepegawaian militer TNI AD (Arhanud) denga
   - CRUD operations untuk semua reference data
   - Search/filter data
   - Seeded initial data: 21 pangkat, 10 korps, 6 agama, 4 jenis diklat, 4 satuan, 8 jabatan
+- **Added (9 Jan 2025)**: Export Laporan PDF/Excel
+  - Halaman Laporan dengan UI lengkap
+  - Export Daftar Personel ke Excel dengan filter (kategori, status)
+  - Export Daftar Personel ke PDF dengan filter
+  - Export Statistik Personel ke Excel (per kategori, per pangkat)
+  - Export Biodata Individu ke PDF
+- **Added (9 Jan 2025)**: Upload Dokumen Personel
+  - Tab "Dokumen" di halaman Detail Personel
+  - Upload dokumen dengan jenis: SK Pangkat, SK Jabatan, Ijazah, Sertifikat, Foto, Lainnya
+  - Download dan hapus dokumen
+  - Role-based access (Admin/Staff dapat upload, Personel hanya lihat)
+  - Validasi file type (.pdf, .jpg, .png, .doc, .docx) dan ukuran (max 10MB)
 
 ## Database Schema (Refactored)
 Aplikasi menggunakan schema multi-koleksi yang ternormalisasi:
