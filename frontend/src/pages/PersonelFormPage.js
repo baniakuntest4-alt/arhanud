@@ -40,12 +40,20 @@ export const PersonelFormPage = () => {
     jabatan_sekarang: '',
     tmt_pangkat: ''
   });
+  
+  // DIKBANG state
+  const [dikbangum, setDikbangum] = useState([]);
+  const [dikbangspes, setDikbangspes] = useState([]);
+  const [newDikbangum, setNewDikbangum] = useState({ nama_diklat: '', tahun: '', hasil: 'LULUS' });
+  const [newDikbangspes, setNewDikbangspes] = useState({ nama_diklat: '', tahun: '', hasil: 'LULUS' });
+  
   const [refPangkat, setRefPangkat] = useState([]);
   const [refAgama, setRefAgama] = useState([]);
   const [loading, setLoading] = useState(false);
   const [fetchLoading, setFetchLoading] = useState(isEdit);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [activeTab, setActiveTab] = useState('data-dasar');
 
   useEffect(() => {
     const fetchRefs = async () => {
