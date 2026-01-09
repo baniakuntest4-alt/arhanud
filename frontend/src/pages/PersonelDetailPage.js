@@ -29,8 +29,45 @@ import {
   Medal,
   Activity,
   FileText,
-  Plus
+  Plus,
+  Upload,
+  Download,
+  Trash2,
+  File,
+  FileImage,
+  Loader2,
+  AlertCircle
 } from 'lucide-react';
+import { Input } from '../components/ui/input';
+import { Label } from '../components/ui/label';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '../components/ui/select';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '../components/ui/dialog';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '../components/ui/alert-dialog';
+import { Alert, AlertDescription } from '../components/ui/alert';
 
 const InfoItem = ({ label, value, icon: Icon }) => (
   <div className="flex items-start gap-3 py-2">
@@ -54,7 +91,16 @@ export const PersonelDetailPage = () => {
   const [tandaJasa, setTandaJasa] = useState([]);
   const [keluarga, setKeluarga] = useState([]);
   const [kesejahteraan, setKesejahteraan] = useState(null);
+  const [documents, setDocuments] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [uploadDialogOpen, setUploadDialogOpen] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState('');
+  const [uploadForm, setUploadForm] = useState({
+    file: null,
+    jenis_dokumen: '',
+    keterangan: ''
+  });
 
   useEffect(() => {
     const fetchData = async () => {
@@ -67,7 +113,8 @@ export const PersonelDetailPage = () => {
           prestasiRes,
           tandaJasaRes,
           keluargaRes,
-          kesejahteraanRes
+          kesejahteraanRes,
+          documentsRes
         ] = await Promise.all([
           api.get(`/personel/${nrp}`),
           api.get(`/personel/${nrp}/riwayat-jabatan`),
@@ -76,7 +123,8 @@ export const PersonelDetailPage = () => {
           api.get(`/personel/${nrp}/prestasi`),
           api.get(`/personel/${nrp}/tanda-jasa`),
           api.get(`/personel/${nrp}/keluarga`),
-          api.get(`/personel/${nrp}/kesejahteraan`)
+          api.get(`/personel/${nrp}/kesejahteraan`),
+          api.get(`/personel/${nrp}/documents`)
         ]);
         
         setPersonel(personelRes.data);
@@ -87,6 +135,7 @@ export const PersonelDetailPage = () => {
         setTandaJasa(tandaJasaRes.data);
         setKeluarga(keluargaRes.data);
         setKesejahteraan(kesejahteraanRes.data);
+        setDocuments(documentsRes.data || []);
       } catch (error) {
         console.error('Error fetching personel:', error);
       } finally {
