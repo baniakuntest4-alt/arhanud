@@ -73,8 +73,16 @@ export const PersonelFormPage = () => {
     if (isEdit) {
       const fetchPersonel = async () => {
         try {
-          const response = await api.get(`/personel/${nrp}`);
-          setFormData(response.data);
+          const [personelRes, dikbangRes] = await Promise.all([
+            api.get(`/personel/${nrp}`),
+            api.get(`/personel/${nrp}/dikbang`)
+          ]);
+          setFormData(personelRes.data);
+          
+          // Split dikbang by jenis
+          const allDikbang = dikbangRes.data || [];
+          setDikbangum(allDikbang.filter(d => d.jenis_diklat === 'DIKBANGUM'));
+          setDikbangspes(allDikbang.filter(d => d.jenis_diklat === 'DIKBANGSPES'));
         } catch (err) {
           setError('Gagal memuat data personel');
         } finally {
