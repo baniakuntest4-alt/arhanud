@@ -147,6 +147,95 @@ export const PersonelDetailPage = () => {
 
   const canEdit = user?.role === 'admin' || user?.role === 'staff';
 
+  // Document upload handlers
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setUploadForm(prev => ({ ...prev, file }));
+    }
+  };
+
+  const handleUploadDocument = async () => {
+    if (!uploadForm.file || !uploadForm.jenis_dokumen) {
+      setUploadError('File dan jenis dokumen harus diisi');
+      return;
+    }
+
+    setUploading(true);
+    setUploadError('');
+
+    try {
+      const formData = new FormData();
+      formData.append('file', uploadForm.file);
+      
+      const params = new URLSearchParams({
+        jenis_dokumen: uploadForm.jenis_dokumen,
+        keterangan: uploadForm.keterangan || ''
+      });
+
+      await api.post(`/personel/${nrp}/documents?${params.toString()}`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+
+      // Refresh documents list
+      const docsRes = await api.get(`/personel/${nrp}/documents`);
+      setDocuments(docsRes.data || []);
+      
+      // Reset form and close dialog
+      setUploadForm({ file: null, jenis_dokumen: '', keterangan: '' });
+      setUploadDialogOpen(false);
+    } catch (err) {
+      setUploadError(err.response?.data?.detail || 'Gagal mengupload dokumen');
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleDownloadDocument = async (docId, filename) => {
+    try {
+      const response = await api.get(`/documents/${docId}/download`, { responseType: 'blob' });
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', filename);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error('Download error:', err);
+    }
+  };
+
+  const handleDeleteDocument = async (docId) => {
+    try {
+      await api.delete(`/documents/${docId}`);
+      setDocuments(prev => prev.filter(d => d.id !== docId));
+    } catch (err) {
+      console.error('Delete error:', err);
+    }
+  };
+
+  const getDocIcon = (fileType) => {
+    if (['.jpg', '.jpeg', '.png'].includes(fileType)) return FileImage;
+    return File;
+  };
+
+  const formatFileSize = (bytes) => {
+    if (bytes < 1024) return bytes + ' B';
+    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+    return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+  };
+
+  const JENIS_DOKUMEN_OPTIONS = [
+    { value: 'SK_PANGKAT', label: 'SK Pangkat' },
+    { value: 'SK_JABATAN', label: 'SK Jabatan' },
+    { value: 'IJAZAH', label: 'Ijazah' },
+    { value: 'SERTIFIKAT', label: 'Sertifikat' },
+    { value: 'FOTO', label: 'Foto' },
+    { value: 'LAINNYA', label: 'Lainnya' }
+  ];
+
   if (loading) {
     return (
       <div className="space-y-6">
