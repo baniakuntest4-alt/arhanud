@@ -579,6 +579,194 @@ export const PersonelDetailPage = () => {
             </CardContent>
           </Card>
         </TabsContent>
+
+        <TabsContent value="dokumen">
+          <Card>
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle>Dokumen</CardTitle>
+                  <CardDescription>Dokumen pendukung personel (SK, Ijazah, Sertifikat, dll)</CardDescription>
+                </div>
+                {canEdit && (
+                  <Dialog open={uploadDialogOpen} onOpenChange={setUploadDialogOpen}>
+                    <DialogTrigger asChild>
+                      <Button className="bg-[#4A5D23] hover:bg-[#3d4d1c]" data-testid="upload-document-btn">
+                        <Upload className="w-4 h-4 mr-2" />
+                        Upload Dokumen
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent>
+                      <DialogHeader>
+                        <DialogTitle>Upload Dokumen</DialogTitle>
+                        <DialogDescription>
+                          Upload dokumen untuk {personel?.nama_lengkap}
+                        </DialogDescription>
+                      </DialogHeader>
+                      
+                      {uploadError && (
+                        <Alert variant="destructive">
+                          <AlertCircle className="w-4 h-4" />
+                          <AlertDescription>{uploadError}</AlertDescription>
+                        </Alert>
+                      )}
+                      
+                      <div className="space-y-4">
+                        <div className="space-y-2">
+                          <Label htmlFor="jenis_dokumen">Jenis Dokumen *</Label>
+                          <Select 
+                            value={uploadForm.jenis_dokumen} 
+                            onValueChange={(v) => setUploadForm(prev => ({ ...prev, jenis_dokumen: v }))}
+                          >
+                            <SelectTrigger data-testid="jenis-dokumen-select">
+                              <SelectValue placeholder="Pilih jenis dokumen" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {JENIS_DOKUMEN_OPTIONS.map(opt => (
+                                <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        
+                        <div className="space-y-2">
+                          <Label htmlFor="file">File *</Label>
+                          <Input 
+                            type="file" 
+                            onChange={handleFileChange}
+                            accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
+                            data-testid="file-input"
+                          />
+                          <p className="text-xs text-muted-foreground">
+                            Format: PDF, JPG, PNG, DOC, DOCX. Maks 10MB
+                          </p>
+                        </div>
+                        
+                        <div className="space-y-2">
+                          <Label htmlFor="keterangan">Keterangan</Label>
+                          <Input 
+                            value={uploadForm.keterangan}
+                            onChange={(e) => setUploadForm(prev => ({ ...prev, keterangan: e.target.value }))}
+                            placeholder="Keterangan tambahan (opsional)"
+                            data-testid="keterangan-input"
+                          />
+                        </div>
+                      </div>
+                      
+                      <DialogFooter>
+                        <Button variant="outline" onClick={() => setUploadDialogOpen(false)}>
+                          Batal
+                        </Button>
+                        <Button 
+                          onClick={handleUploadDocument} 
+                          disabled={uploading}
+                          className="bg-[#4A5D23] hover:bg-[#3d4d1c]"
+                          data-testid="submit-upload-btn"
+                        >
+                          {uploading ? (
+                            <>
+                              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                              Mengupload...
+                            </>
+                          ) : (
+                            <>
+                              <Upload className="w-4 h-4 mr-2" />
+                              Upload
+                            </>
+                          )}
+                        </Button>
+                      </DialogFooter>
+                    </DialogContent>
+                  </Dialog>
+                )}
+              </div>
+            </CardHeader>
+            <CardContent>
+              {documents.length === 0 ? (
+                <div className="text-center py-12">
+                  <FileText className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
+                  <p className="text-sm text-muted-foreground">Belum ada dokumen yang diupload</p>
+                  {canEdit && (
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Klik tombol "Upload Dokumen" untuk menambahkan
+                    </p>
+                  )}
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {documents.map((doc) => {
+                    const DocIcon = getDocIcon(doc.file_type);
+                    return (
+                      <div 
+                        key={doc.id} 
+                        className="flex items-center justify-between p-4 bg-muted/50 rounded-lg"
+                        data-testid={`document-item-${doc.id}`}
+                      >
+                        <div className="flex items-center gap-4">
+                          <div className="p-2 bg-[#4A5D23]/10 rounded-lg">
+                            <DocIcon className="w-6 h-6 text-[#4A5D23]" />
+                          </div>
+                          <div>
+                            <p className="font-medium">{doc.nama_file}</p>
+                            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                              <Badge variant="outline" className="text-xs">{doc.jenis_dokumen}</Badge>
+                              <span>{formatFileSize(doc.file_size)}</span>
+                              {doc.keterangan && <span>• {doc.keterangan}</span>}
+                            </div>
+                            <p className="text-xs text-muted-foreground mt-1">
+                              Diupload oleh {doc.uploaded_by_name} pada {new Date(doc.created_at).toLocaleDateString('id-ID')}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            onClick={() => handleDownloadDocument(doc.id, doc.nama_file)}
+                            data-testid={`download-doc-${doc.id}`}
+                          >
+                            <Download className="w-4 h-4" />
+                          </Button>
+                          {canEdit && (
+                            <AlertDialog>
+                              <AlertDialogTrigger asChild>
+                                <Button 
+                                  variant="outline" 
+                                  size="sm"
+                                  className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                                  data-testid={`delete-doc-${doc.id}`}
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                </Button>
+                              </AlertDialogTrigger>
+                              <AlertDialogContent>
+                                <AlertDialogHeader>
+                                  <AlertDialogTitle>Hapus Dokumen?</AlertDialogTitle>
+                                  <AlertDialogDescription>
+                                    Dokumen "{doc.nama_file}" akan dihapus permanen. Tindakan ini tidak dapat dibatalkan.
+                                  </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                  <AlertDialogCancel>Batal</AlertDialogCancel>
+                                  <AlertDialogAction 
+                                    onClick={() => handleDeleteDocument(doc.id)}
+                                    className="bg-red-600 hover:bg-red-700"
+                                  >
+                                    Hapus
+                                  </AlertDialogAction>
+                                </AlertDialogFooter>
+                              </AlertDialogContent>
+                            </AlertDialog>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
       </Tabs>
     </div>
   );
