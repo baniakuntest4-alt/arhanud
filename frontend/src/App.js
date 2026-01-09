@@ -68,13 +68,7 @@ const PublicRoute = ({ children }) => {
 };
 
 function AppRoutes() {
-  const { user } = useAuth();
-  
-  // Determine home route based on role
-  const getHomeRoute = () => {
-    if (user?.role === 'personnel') return '/dashboard-personel';
-    return '/dashboard';
-  };
+  const { user, isAuthenticated } = useAuth();
 
   return (
     <Routes>
@@ -124,8 +118,16 @@ function AppRoutes() {
       <Route path="/kesejahteraan" element={<ProtectedRoute allowedRoles={['admin', 'staff']}><PersonelListPage /></ProtectedRoute>} />
       
       {/* Default - redirect based on role */}
-      <Route path="/" element={<Navigate to={user?.role === 'personnel' ? '/dashboard-personel' : '/dashboard'} replace />} />
-      <Route path="*" element={<Navigate to={user?.role === 'personnel' ? '/dashboard-personel' : '/dashboard'} replace />} />
+      <Route path="/" element={
+        isAuthenticated 
+          ? <Navigate to={user?.role === 'personnel' ? '/dashboard-personel' : '/dashboard'} replace />
+          : <Navigate to="/login" replace />
+      } />
+      <Route path="*" element={
+        isAuthenticated 
+          ? <Navigate to={user?.role === 'personnel' ? '/dashboard-personel' : '/dashboard'} replace />
+          : <Navigate to="/login" replace />
+      } />
     </Routes>
   );
 }
