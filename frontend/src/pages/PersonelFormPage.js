@@ -99,6 +99,93 @@ export const PersonelFormPage = () => {
     setSuccess('');
   };
 
+  // DIKBANG handlers
+  const handleAddDikbangum = async () => {
+    if (!newDikbangum.nama_diklat) return;
+    
+    try {
+      if (isEdit) {
+        // If editing, save to API
+        await api.post(`/personel/${nrp}/dikbang`, {
+          ...newDikbangum,
+          jenis_diklat: 'DIKBANGUM'
+        });
+        // Refresh dikbang data
+        const res = await api.get(`/personel/${nrp}/dikbang`);
+        setDikbangum(res.data.filter(d => d.jenis_diklat === 'DIKBANGUM'));
+        setSuccess('DIKBANGUM berhasil ditambahkan');
+      } else {
+        // If new personel, just add to local state
+        setDikbangum(prev => [...prev, { 
+          ...newDikbangum, 
+          id: Date.now().toString(),
+          jenis_diklat: 'DIKBANGUM'
+        }]);
+      }
+      setNewDikbangum({ nama_diklat: '', tahun: '', hasil: 'LULUS' });
+    } catch (err) {
+      setError('Gagal menambah DIKBANGUM');
+    }
+  };
+
+  const handleAddDikbangspes = async () => {
+    if (!newDikbangspes.nama_diklat) return;
+    
+    try {
+      if (isEdit) {
+        await api.post(`/personel/${nrp}/dikbang`, {
+          ...newDikbangspes,
+          jenis_diklat: 'DIKBANGSPES'
+        });
+        const res = await api.get(`/personel/${nrp}/dikbang`);
+        setDikbangspes(res.data.filter(d => d.jenis_diklat === 'DIKBANGSPES'));
+        setSuccess('DIKBANGSPES berhasil ditambahkan');
+      } else {
+        setDikbangspes(prev => [...prev, { 
+          ...newDikbangspes, 
+          id: Date.now().toString(),
+          jenis_diklat: 'DIKBANGSPES'
+        }]);
+      }
+      setNewDikbangspes({ nama_diklat: '', tahun: '', hasil: 'LULUS' });
+    } catch (err) {
+      setError('Gagal menambah DIKBANGSPES');
+    }
+  };
+
+  const handleDeleteDikbang = async (dikbangId, jenis) => {
+    try {
+      if (isEdit) {
+        await api.delete(`/dikbang/${dikbangId}`);
+        setSuccess('Data pendidikan berhasil dihapus');
+      }
+      
+      if (jenis === 'DIKBANGUM') {
+        setDikbangum(prev => prev.filter(d => d.id !== dikbangId));
+      } else {
+        setDikbangspes(prev => prev.filter(d => d.id !== dikbangId));
+      }
+    } catch (err) {
+      setError('Gagal menghapus data pendidikan');
+    }
+  };
+
+  const handleUpdateDikbangTahun = async (dikbangId, tahun, jenis) => {
+    try {
+      if (isEdit) {
+        await api.put(`/dikbang/${dikbangId}`, { tahun });
+      }
+      
+      if (jenis === 'DIKBANGUM') {
+        setDikbangum(prev => prev.map(d => d.id === dikbangId ? { ...d, tahun } : d));
+      } else {
+        setDikbangspes(prev => prev.map(d => d.id === dikbangId ? { ...d, tahun } : d));
+      }
+    } catch (err) {
+      setError('Gagal update tahun');
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
