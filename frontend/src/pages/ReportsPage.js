@@ -234,13 +234,13 @@ export const ReportsPage = () => {
                     </Button>
                   )}
                 </div>
-                {report.hasFilters && (filters.kategori || filters.status) && (
+                {report.hasFilters && (filters.kategori && filters.kategori !== 'ALL' || filters.status && filters.status !== 'ALL') && (
                   <div className="mt-3 flex flex-wrap gap-2">
                     <span className="text-sm text-muted-foreground">Filter aktif:</span>
-                    {filters.kategori && (
+                    {filters.kategori && filters.kategori !== 'ALL' && (
                       <Badge variant="outline">{filters.kategori}</Badge>
                     )}
-                    {filters.status && (
+                    {filters.status && filters.status !== 'ALL' && (
                       <Badge variant="outline">{filters.status}</Badge>
                     )}
                   </div>
