@@ -149,13 +149,19 @@ export const DashboardPage = () => {
   const { api, user } = useAuth();
   const navigate = useNavigate();
   const [stats, setStats] = useState(null);
+  const [recentPengajuan, setRecentPengajuan] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const response = await api.get('/dashboard/stats');
-        setStats(response.data);
+        const [statsRes, pengajuanRes] = await Promise.all([
+          api.get('/dashboard/stats'),
+          api.get('/pengajuan')
+        ]);
+        setStats(statsRes.data);
+        // Get recent 5 pengajuan
+        setRecentPengajuan(pengajuanRes.data.slice(0, 5));
       } catch (err) {
         console.error('Error fetching stats:', err);
       } finally {
@@ -165,12 +171,41 @@ export const DashboardPage = () => {
     fetchStats();
   }, [api]);
 
+  const pendingCount = recentPengajuan.filter(p => p.status === 'pending').length;
+
   const roleLabels = {
     admin: 'Administrator',
     staff: 'Staf Kepegawaian',
     verifier: 'Pejabat Verifikator',
     leader: 'Pimpinan',
     personnel: 'Personel'
+  };
+
+  const getStatusBadge = (status) => {
+    const variants = {
+      pending: { label: 'Pending', class: 'bg-yellow-100 text-yellow-800', icon: Clock },
+      approved: { label: 'Disetujui', class: 'bg-green-100 text-green-800', icon: CheckCircle },
+      rejected: { label: 'Ditolak', class: 'bg-red-100 text-red-800', icon: XCircle }
+    };
+    const variant = variants[status] || variants.pending;
+    const Icon = variant.icon;
+    return (
+      <Badge className={`${variant.class} flex items-center gap-1`}>
+        <Icon className="w-3 h-3" />
+        {variant.label}
+      </Badge>
+    );
+  };
+
+  const formatDate = (dateStr) => {
+    if (!dateStr) return '-';
+    const date = new Date(dateStr);
+    return date.toLocaleDateString('id-ID', {
+      day: 'numeric',
+      month: 'short',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
   };
 
   return (
