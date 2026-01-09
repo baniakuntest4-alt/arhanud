@@ -60,8 +60,8 @@ export const ReportsPage = () => {
       
       // Build query params
       const params = new URLSearchParams();
-      if (filters.kategori) params.append('kategori', filters.kategori);
-      if (filters.status) params.append('status', filters.status);
+      if (filters.kategori && filters.kategori !== 'ALL') params.append('kategori', filters.kategori);
+      if (filters.status && filters.status !== 'ALL') params.append('status', filters.status);
       const queryString = params.toString() ? `?${params.toString()}` : '';
 
       switch (reportType) {
