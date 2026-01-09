@@ -92,7 +92,7 @@ Membangun aplikasi web internal untuk kepegawaian militer TNI AD (Arhanud) denga
 - [ ] Import keluarga dari Excel
 
 ## Next Action Items
-1. Tambahkan field TAHUN untuk DIKBANG (Pendidikan Pengembangan)
+1. ~~Tambahkan field TAHUN untuk DIKBANG (Pendidikan Pengembangan)~~ ✅ DONE
 2. Build halaman-halaman lainnya (Riwayat, Prestasi, Kesejahteraan, dll)
 3. Implementasi Master Data Management UI
 4. Test alur verifikasi end-to-end
