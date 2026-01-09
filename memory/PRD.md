@@ -123,6 +123,11 @@ Membangun aplikasi web internal untuk kepegawaian militer TNI AD (Arhanud) denga
   - Counter "Pengajuan Pending" di stat cards
   - Section "Pengajuan Terbaru" dengan daftar 5 pengajuan terakhir
   - Aksi Cepat khusus untuk role Verifikator
+- **Added**: Halaman Master Data Management (Admin only)
+  - 6 tabs: Pangkat, Jabatan, Satuan, Korps, Agama, Jenis Diklat
+  - CRUD operations untuk semua reference data
+  - Search/filter data
+  - Seeded initial data: 21 pangkat, 10 korps, 6 agama, 4 jenis diklat, 4 satuan, 8 jabatan
 
 ## Database Schema (Refactored)
 Aplikasi menggunakan schema multi-koleksi yang ternormalisasi:
