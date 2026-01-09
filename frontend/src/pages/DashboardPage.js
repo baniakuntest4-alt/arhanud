@@ -354,15 +354,62 @@ export const DashboardPage = () => {
           </CardContent>
         </Card>
 
+        {/* Recent Pengajuan - For Admin/Staff/Verifier */}
+        {(user?.role === 'admin' || user?.role === 'staff' || user?.role === 'verifier') && (
+          <Card>
+            <CardHeader className="pb-3">
+              <div className="flex items-center justify-between">
+                <CardTitle className="flex items-center gap-2">
+                  <FileCheck className="w-5 h-5 text-amber-600" />
+                  Pengajuan Terbaru
+                </CardTitle>
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  onClick={() => navigate(user?.role === 'verifier' ? '/verifikasi' : '/pengajuan')}
+                >
+                  Lihat Semua
+                  <ChevronRight className="w-4 h-4 ml-1" />
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent className="pt-0">
+              {loading ? (
+                <div className="space-y-3">
+                  {[1, 2, 3].map(i => <Skeleton key={i} className="h-16 w-full" />)}
+                </div>
+              ) : recentPengajuan.length > 0 ? (
+                <div className="space-y-3">
+                  {recentPengajuan.map((p) => (
+                    <div key={p.id} className="flex items-center justify-between p-3 bg-muted/50 rounded-md">
+                      <div className="min-w-0 flex-1">
+                        <p className="font-medium text-sm truncate">
+                          {p.nama_lengkap || 'N/A'} - {p.pangkat || ''}
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          {p.jenis_pengajuan === 'koreksi' ? 'Koreksi Data' : p.jenis_pengajuan} • {formatDate(p.created_at)}
+                        </p>
+                      </div>
+                      {getStatusBadge(p.status)}
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-sm text-muted-foreground text-center py-4">Belum ada pengajuan</p>
+              )}
+            </CardContent>
+          </Card>
+        )}
+
         {/* Quick Actions */}
         {(user?.role === 'admin' || user?.role === 'staff') && (
-          <Card className="lg:col-span-2">
+          <Card>
             <CardHeader>
               <CardTitle>Aksi Cepat</CardTitle>
               <CardDescription>Akses fitur yang sering digunakan</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 gap-3">
                 <Button
                   variant="outline"
                   className="justify-start h-auto py-4"
@@ -404,6 +451,56 @@ export const DashboardPage = () => {
                   className="justify-start h-auto py-4"
                   onClick={() => navigate('/laporan')}
                   data-testid="quick-laporan"
+                >
+                  <FileText className="w-5 h-5 mr-3 text-[#4A5D23]" />
+                  <div className="text-left">
+                    <p className="font-medium">Laporan</p>
+                    <p className="text-xs text-muted-foreground">Export data</p>
+                  </div>
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Quick Actions for Verifier */}
+        {user?.role === 'verifier' && (
+          <Card>
+            <CardHeader>
+              <CardTitle>Aksi Cepat</CardTitle>
+              <CardDescription>Menu verifikator</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 gap-3">
+                <Button
+                  variant="outline"
+                  className="justify-start h-auto py-4"
+                  onClick={() => navigate('/verifikasi')}
+                  data-testid="quick-verifikasi"
+                >
+                  <FileCheck className="w-5 h-5 mr-3 text-amber-600" />
+                  <div className="text-left">
+                    <p className="font-medium">Verifikasi Pengajuan</p>
+                    <p className="text-xs text-muted-foreground">{pendingCount} menunggu verifikasi</p>
+                  </div>
+                </Button>
+                <Button
+                  variant="outline"
+                  className="justify-start h-auto py-4"
+                  onClick={() => navigate('/personel')}
+                  data-testid="quick-view-personel-v"
+                >
+                  <Users className="w-5 h-5 mr-3 text-[#4A5D23]" />
+                  <div className="text-left">
+                    <p className="font-medium">Data Personel</p>
+                    <p className="text-xs text-muted-foreground">Lihat data personel</p>
+                  </div>
+                </Button>
+                <Button
+                  variant="outline"
+                  className="justify-start h-auto py-4"
+                  onClick={() => navigate('/laporan')}
+                  data-testid="quick-laporan-v"
                 >
                   <FileText className="w-5 h-5 mr-3 text-[#4A5D23]" />
                   <div className="text-left">
