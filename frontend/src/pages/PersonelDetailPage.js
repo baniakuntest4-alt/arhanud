@@ -347,6 +347,10 @@ export const PersonelDetailPage = () => {
             <Heart className="w-4 h-4" />
             <span className="hidden sm:inline">Keluarga</span>
           </TabsTrigger>
+          <TabsTrigger value="dokumen" className="flex items-center gap-1">
+            <FileText className="w-4 h-4" />
+            <span className="hidden sm:inline">Dokumen</span>
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="dikbang">
